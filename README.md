@@ -23,3 +23,6 @@ Ao mudar o código, aumente a versão em `sw.js` (`const V = 'engefit-v2'`) para
 
 ## Dados
 Ficam no navegador de cada pessoa (localStorage). Use Perfil > Ajustes > Copiar backup para levar a outro aparelho.
+
+---
+Atualizações são enviadas por commits neste repositório; a Vercel publica sozinha.
