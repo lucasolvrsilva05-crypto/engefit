@@ -248,6 +248,14 @@ body.authmode .app,body.authmode .tabs,body.authmode #dock{display:none}
 .sync[data-s="offline"] i,.sync[data-s="error"] i{background:var(--bad)}
 .spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:8px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+#install{padding:12px 16px 0}
+#install:empty{display:none}
+body:not(.authmode) #install{margin-left:var(--side)}
+.instbar{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:10px 12px}
+.instbar img{border-radius:10px;flex:none}
+.instbar div{flex:1;min-width:0}
+.instbar small{display:block;color:var(--muted);font-size:12px;line-height:1.35}
+.isteps{margin:0 0 14px;padding-left:22px;display:flex;flex-direction:column;gap:10px;line-height:1.5}
 .pw.at b{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
 .pw.at input{padding-left:28px;padding-right:11px}
 .chkrow{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;font-size:14px;cursor:pointer}
@@ -270,6 +278,7 @@ body.authmode .app,body.authmode .tabs,body.authmode #dock{display:none}
   .tabs a svg{width:22px;height:22px}
   .tabs a.on{color:var(--accent)}
   #dock{left:0;bottom:calc(var(--tabh) + 8px);padding:0 12px}
+  body:not(.authmode) #install{margin-left:0}
   #toast{bottom:150px}
   .filters{grid-template-columns:1fr}
   .grid2{grid-template-columns:1fr}
@@ -282,6 +291,7 @@ body.authmode .app,body.authmode .tabs,body.authmode #dock{display:none}
 </style>
 </head>
 <body>
+<div id="install"></div>
 <div id="auth" hidden></div>
 <div class="app">
   <aside class="side" aria-label="Navegação principal">
@@ -496,7 +506,7 @@ function showAuth(mode){
       (authMode==='login'?'<button type="button" class="linkbtn" data-act="auth-mode" data-v="forgot">Esqueci minha senha</button><button type="button" class="linkbtn" data-act="auth-mode" data-v="signup">Criar conta</button>':authMode==='reset'?'':'<button type="button" class="linkbtn" data-act="auth-mode" data-v="login">Voltar para entrar</button>')+
       '</div></form>';
   }
-  el.innerHTML='<div class="authbox"><div class="logo">'+LOGO+'</div>'+h+'<p class="authfoot">Registre. Meça. Progrida com carga.</p></div>';
+  el.innerHTML='<div class="authbox"><div class="logo">'+LOGO+'</div>'+h+'<p class="authfoot">Registre. Meça. Progrida com carga.'+(isStandalone()?'':'<br><button type="button" class="linkbtn" data-act="install" style="margin-top:10px;font-family:var(--body)">Instalar o app no celular</button>')+'</p></div>';
   var f=Array.prototype.filter.call(el.querySelectorAll('input'),function(i){return !i.value;})[0];
   if(f)try{f.focus();}catch(e){}
 }
@@ -563,7 +573,7 @@ function logout(){
   push().then(function(ok){if(ok&&!sync.dirty)go();else toast('Sem conexão. Conecte-se para sair sem perder o que ainda não foi salvo.');});
 }
 function boot(){
-  buildNav();
+  buildNav();drawInstall();
   var h=location.hash||'',recovery=h.indexOf('type=recovery')>-1,herr=/error_description=([^&]+)/.exec(h);
   if(!window.supabase||!SUPABASE_URL||!SUPABASE_KEY){showAuth('config');return;}
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -1089,6 +1099,35 @@ function profileFormHTML(m){
     '<button class="btn primary block" type="submit" id="asub">Continuar</button><div class="alinks"><button type="button" class="linkbtn" data-act="logout">Sair da conta</button></div></form>';
 }
 
+/* ====== Instalar o app ====== */
+var inst={evt:null};
+function isStandalone(){try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}catch(e){return false;}}
+function platform(){
+  var ua=navigator.userAgent||'',ios=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),android=/android/i.test(ua);
+  return {ios:ios,android:android,mobile:ios||android||/mobile/i.test(ua),iosOther:ios&&/crios|fxios|edgios/i.test(ua)};
+}
+function installHidden(){try{return Date.now()-(+localStorage.getItem('engefit.instHide')||0)<7*864e5;}catch(e){return false;}}
+function canOfferInstall(){return !isStandalone()&&(platform().mobile||!!inst.evt);}
+function drawInstall(){
+  var el=$('#install');if(!el)return;
+  if(!canOfferInstall()||installHidden()){el.innerHTML='';return;}
+  el.innerHTML='<div class="instbar" role="region" aria-label="Instalar o app"><img src="/icons/icon-192.png" alt="" width="40" height="40"><div><b>Instale o ENGEFIT</b><small>'+(inst.evt?'Abra pela tela inicial, em tela cheia, até sem internet.':'Coloque o app na tela inicial em poucos toques.')+'</small></div><button class="btn sm primary" data-act="install">Instalar</button><button class="x" data-act="install-hide" aria-label="Agora não">×</button></div>';
+}
+function doInstall(){
+  if(inst.evt){var e=inst.evt;inst.evt=null;try{e.prompt();e.userChoice.then(drawInstall,drawInstall);}catch(x){installHelp();}drawInstall();return;}
+  installHelp();
+}
+function installHelp(){
+  var pl=platform(),steps;
+  if(pl.ios&&!pl.iosOther)steps=['Toque no botão <b>Compartilhar</b> do Safari (o quadrado com uma seta para cima).','Role a lista e toque em <b>Adicionar à Tela de Início</b>.','Toque em <b>Adicionar</b>. O ícone do ENGEFIT aparece na sua tela inicial.'];
+  else if(pl.ios)steps=['Toque no botão <b>Compartilhar</b> do navegador.','Toque em <b>Adicionar à Tela de Início</b>. Se a opção não aparecer, abra engefit.vercel.app no <b>Safari</b> e faça por lá.','Toque em <b>Adicionar</b>.'];
+  else if(pl.android)steps=['Toque no menu <b>⋮</b> do navegador, no canto superior direito.','Toque em <b>Instalar app</b> ou em <b>Adicionar à tela inicial</b>.','Confirme em <b>Instalar</b>. Se a opção não aparecer, abra engefit.vercel.app no <b>Chrome</b>.'];
+  else steps=['No Chrome ou no Edge, clique no ícone de instalar na barra de endereço (um monitor com uma seta).','Ou abra o menu do navegador e escolha <b>Instalar ENGEFIT</b>.','No celular, abra engefit.vercel.app e toque em <b>Instalar</b>.'];
+  pushModal({title:'Instalar o ENGEFIT',html:function(){return head('Instalar o ENGEFIT')+'<ol class="isteps">'+steps.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol><p class="note">Instalado, o ENGEFIT abre em tela cheia como um app e funciona sem internet. Suas contas e treinos continuam os mesmos.</p><div class="row end"><button class="btn primary" data-act="modal-close">Entendi</button></div>';}});
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();inst.evt=e;drawInstall();});
+window.addEventListener('appinstalled',function(){inst.evt=null;drawInstall();toast('ENGEFIT instalado. Abra pelo ícone na tela inicial.');});
+
 /* ====== Views ====== */
 function ph(eyebrow,title,right){return '<header class="ph"><div class="wrap"><div><p class="eyebrow">'+esc(eyebrow)+'</p><h1>'+esc(title)+'</h1></div>'+(right||'')+'</div></header>';}
 function posts(){
@@ -1235,7 +1274,7 @@ function calcP(){
   o.innerHTML='<div class="tile"><span class="lbl">Por lado</span><b style="font-size:18px;line-height:1.4">'+(res.join(' + ')||'Só a barra')+'</b>'+(side>0.01?'<small>Faltam '+num(side*2,2)+' kg para fechar a carga com estas anilhas.</small>':'')+'</div>';
 }
 function pCfg(){
-  return '<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:4px">Conta</h3><p class="note" style="margin-bottom:12px">'+esc(user?user.email:'')+'</p><div class="row" style="justify-content:space-between"><span class="sync" data-sync><i></i><span></span></span><button class="btn" data-act="logout">Sair da conta</button></div></div>'+socCfgHTML()+'<div class="card"><label class="fl">Seu nome<input data-bind="name" value="'+esc(S.settings.name)+'"></label><div class="fl">Unidade de carga<div class="seg" style="align-self:flex-start"><button data-act="unit" data-v="kg" class="'+(unit()==='kg'?'on':'')+'">kg</button><button data-act="unit" data-v="lb" class="'+(unit()==='lb'?'on':'')+'">lb</button></div></div><label class="fl">Descanso padrão entre séries<select data-bind="rest">'+[[0,'Desativado'],[30,'30 s'],[45,'45 s'],[60,'1 min'],[90,'1 min 30 s'],[120,'2 min'],[180,'3 min']].map(function(o){return '<option value="'+o[0]+'"'+(S.settings.rest===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></label></div>'+
+  return '<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:4px">Conta</h3><p class="note" style="margin-bottom:12px">'+esc(user?user.email:'')+'</p><div class="row" style="justify-content:space-between"><span class="sync" data-sync><i></i><span></span></span><button class="btn" data-act="logout">Sair da conta</button></div></div>'+socCfgHTML()+(isStandalone()?'':'<div class="card row" style="margin-bottom:14px;justify-content:space-between"><div><h3 style="margin-bottom:2px">Instalar o app</h3><p class="note">Abra o ENGEFIT pela tela inicial, em tela cheia.</p></div><button class="btn primary" data-act="install">Instalar</button></div>')+'<div class="card"><label class="fl">Seu nome<input data-bind="name" value="'+esc(S.settings.name)+'"></label><div class="fl">Unidade de carga<div class="seg" style="align-self:flex-start"><button data-act="unit" data-v="kg" class="'+(unit()==='kg'?'on':'')+'">kg</button><button data-act="unit" data-v="lb" class="'+(unit()==='lb'?'on':'')+'">lb</button></div></div><label class="fl">Descanso padrão entre séries<select data-bind="rest">'+[[0,'Desativado'],[30,'30 s'],[45,'45 s'],[60,'1 min'],[90,'1 min 30 s'],[120,'2 min'],[180,'3 min']].map(function(o){return '<option value="'+o[0]+'"'+(S.settings.rest===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></label></div>'+
   '<div class="card" style="margin-top:14px"><h3 style="margin-bottom:4px">Seus dados</h3><p class="note" style="margin-bottom:12px">Seus treinos ficam salvos na sua conta e também neste aparelho, para funcionar sem internet. O backup serve para guardar uma cópia extra.</p><div class="row"><button class="btn" data-act="copy-data">Copiar backup</button><button class="btn" data-act="import-data">Restaurar backup</button><button class="btn danger" data-act="wipe">Apagar todos os meus dados</button></div></div>';
 }
 
@@ -1296,6 +1335,8 @@ var ACT={
  'pw-toggle':function(el){var i=$('#'+el.dataset.for);if(!i)return;var sh=i.type==='password';i.type=sh?'text':'password';el.textContent=sh?'Ocultar':'Mostrar';el.setAttribute('aria-label',sh?'Ocultar senha':'Mostrar senha');},
  'auth-retry':function(){if(user)enter(user);},
  'logout':logout,
+ 'install':function(){doInstall();},
+ 'install-hide':function(){try{localStorage.setItem('engefit.instHide',String(Date.now()));}catch(e){}drawInstall();},
  'like':function(el){toggleLike(el.dataset.id);},
  'post-open':function(el){postDetail(el.dataset.id);},
  'post-copy':function(el){copyPost(el.dataset.id);},
