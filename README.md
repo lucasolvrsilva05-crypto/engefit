@@ -21,8 +21,12 @@ vercel --prod
 ## Atualizações
 Ao mudar o código, aumente a versão em `sw.js` (`const V = 'engefit-v2'`) para os usuários receberem a atualização.
 
-## Dados
-Ficam no navegador de cada pessoa (localStorage). Use Perfil > Ajustes > Copiar backup para levar a outro aparelho.
+## Contas e dados
+Cada pessoa cria conta com e-mail e senha. Os treinos ficam no Supabase (tabela `user_data`, uma linha por usuário, protegida por RLS) e numa cópia local para funcionar offline.
+
+- Estrutura do banco: `supabase/schema.sql`.
+- Configuração no `index.html`: `SUPABASE_URL` e `SUPABASE_KEY` (chave pública anon/publishable; nunca a service_role).
+- No Supabase, em Authentication > URL Configuration, o Site URL deve ser o endereço do site.
 
 ---
 Atualizações são enviadas por commits neste repositório; a Vercel publica sozinha.
