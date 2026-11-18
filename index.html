@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ENGEFIT</title>
 <meta name="description" content="Registre treinos, acompanhe cargas e evolua com dados.">
-<meta name="theme-color" content="#13202b">
+<meta name="theme-color" content="#050912">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -15,25 +15,15 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Layout: barra lateral com navegação + coluna única de trabalho; abas fixas no rodapé em telas estreitas. Estética de prancha técnica. */
 :root{
-  --bg:#f2f4f6; --surface:#ffffff; --surface2:#e8ecf0; --ink:#13202b; --muted:#566675; --line:#d3dbe2; --grid:rgba(19,32,43,.055);
-  --accent:#d1430f; --accent-ink:#ffffff; --blue:#1f5fbf; --good:#1a7f45; --bad:#bb3326;
-  --display:'Barlow Condensed','Arial Narrow',sans-serif; --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --bg:#050912; --surface:#0b1424; --surface2:#122038; --ink:#e8f3ff; --muted:#8ea3c2; --line:#1e3352; --grid:rgba(63,184,255,.06);
+  --accent:#3fb8ff; --accent-ink:#041322; --blue:#7fd3ff; --good:#4ade80; --bad:#ff5c7a;
+  --display:'Chakra Petch','Arial Narrow',sans-serif; --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
   --tabh:60px; --side:224px;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0e151b; --surface:#16202a; --surface2:#1f2c38; --ink:#e7edf2; --muted:#93a3b1; --line:#2a3947; --grid:rgba(255,255,255,.045);
-    --accent:#ff7a45; --accent-ink:#1d0d05; --blue:#6aa5ff; --good:#4cc380; --bad:#ff7d6e; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0e151b; --surface:#16202a; --surface2:#1f2c38; --ink:#e7edf2; --muted:#93a3b1; --line:#2a3947; --grid:rgba(255,255,255,.045);
-  --accent:#ff7a45; --accent-ink:#1d0d05; --blue:#6aa5ff; --good:#4cc380; --bad:#ff7d6e; color-scheme:dark;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
@@ -313,6 +303,43 @@ body:not(.authmode) #install{margin-left:var(--side)}
   .tiles{grid-template-columns:repeat(2,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Sistema: janelas azuis, avatar, medidas */
+.card,.tile{background:linear-gradient(180deg,rgba(14,30,56,.7),rgba(8,16,32,.92));border-color:rgba(63,184,255,.2)}
+.side,.tabs{background:#070d1a}
+.sys{position:relative;background:linear-gradient(180deg,rgba(14,30,56,.92),rgba(8,16,32,.96));border:1px solid rgba(63,184,255,.7);border-radius:4px;box-shadow:0 0 0 1px rgba(63,184,255,.15),0 0 28px rgba(63,184,255,.22),inset 0 0 36px rgba(63,184,255,.08)}
+.sys::before,.sys::after{content:"";position:absolute;width:14px;height:14px;border-color:#9fe0ff;border-style:solid;pointer-events:none}
+.sys::before{top:-3px;left:-3px;border-width:2px 0 0 2px}
+.sys::after{bottom:-3px;right:-3px;border-width:0 2px 2px 0}
+.sys.red{border-color:rgba(255,92,122,.75);box-shadow:0 0 0 1px rgba(255,92,122,.15),0 0 28px rgba(255,92,122,.28),inset 0 0 36px rgba(255,92,122,.08);background:linear-gradient(180deg,rgba(48,14,26,.92),rgba(22,8,16,.96))}
+.sys.red::before,.sys.red::after{border-color:#ffb3c1}
+.nav a.on{background:rgba(63,184,255,.12);color:#cdeeff;box-shadow:inset 3px 0 0 var(--accent)}
+.chip.on,.seg button.on{background:rgba(63,184,255,.18);color:#e3f5ff;border-color:var(--accent)}
+.btn.primary{box-shadow:0 0 18px rgba(63,184,255,.3)}
+.btn:hover{border-color:var(--accent)}
+.tabs a.on{color:var(--accent);text-shadow:0 0 12px rgba(63,184,255,.6)}
+.ph h1{text-shadow:0 0 22px rgba(63,184,255,.25)}
+.av{overflow:hidden}.av svg{width:100%;height:100%;display:block}
+.av.has{background:#07101f;border-color:rgba(63,184,255,.5);padding:0}
+.statuswin{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:18px;padding:14px 18px;margin-bottom:18px;align-items:center}
+.statuswin .avfull svg{width:100%;height:auto;display:block}
+.statuswin h2{font-size:26px}
+.avduo{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.rank{display:inline-grid;place-items:center;width:42px;height:42px;border:1.5px solid currentColor;border-radius:4px;font:700 24px/1 var(--display);box-shadow:0 0 14px -2px currentColor,inset 0 0 12px -4px currentColor;flex:none}
+.swlist{display:grid;gap:7px;margin:12px 0 14px}
+.swrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px;font-size:14px}
+.avpick{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:start;margin-bottom:8px}
+.avpick .prev{padding:6px}.avpick .prev svg{width:100%;height:auto;display:block}
+.swatches{display:flex;gap:9px;flex-wrap:wrap;margin:7px 0 14px}
+.sw{width:36px;height:36px;border-radius:50%;border:2px solid var(--line);padding:0;cursor:pointer}
+.sw.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(63,184,255,.3)}
+.measures{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px 12px;margin-bottom:12px}
+.measures .fl{margin:0}
+.howto{margin:0 0 14px;font-size:14px;color:var(--muted)}.howto summary{cursor:pointer;color:var(--blue);font-weight:600}.howto ul{margin:8px 0 0;padding-left:18px}.howto li{margin:3px 0}
+.bodyav{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center;padding:12px 14px;margin-bottom:14px}
+.bodyav svg{width:100%;height:auto;display:block}
+.profav{width:120px;margin:0 0 14px;padding:4px}.profav svg{width:100%;height:auto;display:block}
+@media (max-width:560px){.statuswin{grid-template-columns:118px 1fr;gap:12px;padding:12px}.statuswin h2{font-size:21px}.avpick{grid-template-columns:112px 1fr;gap:12px}}
 </style>
 </head>
 <body>
@@ -336,6 +363,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 
 <script src="/vendor/supabase.js"></script>
 <script src="/demos.js"></script>
+<script src="/avatar.js"></script>
 <script>
 (function(){
 'use strict';
@@ -890,7 +918,7 @@ function pname(p){return p?(p.name||p.username||''):'';}
 function loadPeople(ids){
   ids=ids.filter(function(id,i,a){return id&&!soc.people[id]&&a.indexOf(id)===i;});
   if(!ids.length)return Promise.resolve();
-  return sb.from('profiles').select('id,username,name,is_private').in('id',ids).then(function(r){if(!r.error)r.data.forEach(function(p){soc.people[p.id]=p;});});
+  return sb.from('profiles').select(pcols()).in('id',ids).then(function(r){if(!r.error)r.data.forEach(function(p){soc.people[p.id]=p;});});
 }
 function refreshRelations(){
   return Promise.all([
@@ -905,10 +933,11 @@ function refreshRelations(){
 }
 function loadSocial(){
   soc.ok=false;
-  return sb.from('profiles').select('id,username,name,is_private').eq('id',user.id).maybeSingle().then(function(r){
+  function q(){return sb.from('profiles').select(pcols()).eq('id',user.id).maybeSingle();}
+  return q().then(function(r){if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q();}return r;}).then(function(r){
     if(r.error)throw r.error;
     soc.prof=r.data;soc.ok=true;
-    if(soc.prof){soc.people[user.id]=soc.prof;return refreshRelations();}
+    if(soc.prof){soc.people[user.id]=soc.prof;syncAvatar();return refreshRelations();}
   }).catch(function(){soc.ok=!!soc.prof;});
 }
 function refreshMyStats(){
@@ -967,14 +996,14 @@ function topSet(sets){return (sets||[]).filter(function(s){return s.t!=='W';}).s
 function likeBtn(id){var l=!!soc.liked[id],n=soc.likes[id]||0;return '<button class="btn sm'+(l?' primary':'')+'" data-act="like" data-id="'+id+'" aria-pressed="'+l+'">'+(l?'Curtido':'Curtir')+' · '+n+'</button>';}
 function postCard(p){
   var who=soc.people[p.user_id]||{username:'…',name:''},mine=p.user_id===user.id,ex=p.exercises||[];
-  return '<article class="card post"><div class="who"><button class="avbtn" data-act="open-prof" data-id="'+p.user_id+'" aria-label="Ver perfil de '+esc(pname(who))+'"><span class="av'+(mine?' me':'')+'">'+esc((pname(who)||'?').charAt(0).toUpperCase())+'</span></button><div><button class="namebtn" data-act="open-prof" data-id="'+p.user_id+'">'+esc(pname(who))+(mine?' (você)':'')+'</button><small>@'+esc(who.username)+' · '+relTime(Date.parse(p.started_at))+'</small></div></div>'+
+  return '<article class="card post"><div class="who"><button class="avbtn" data-act="open-prof" data-id="'+p.user_id+'" aria-label="Ver perfil de '+esc(pname(who))+'">'+avHTML(who,mine)+'</button><div><button class="namebtn" data-act="open-prof" data-id="'+p.user_id+'">'+esc(pname(who))+(mine?' (você)':'')+'</button><small>@'+esc(who.username)+' · '+relTime(Date.parse(p.started_at))+'</small></div></div>'+
     '<h3>'+esc(p.name)+'</h3><div class="pstats"><div><span class="lbl">Duração</span><b>'+fmtDur(p.duration_s)+'</b></div><div><span class="lbl">Volume</span><b>'+fmtVol(+p.volume_kg)+'</b></div>'+(p.prs?'<div><span class="lbl">Recordes</span><b>'+p.prs+'</b></div>':'')+'</div>'+
     '<div class="plist">'+ex.slice(0,3).map(function(e){var t=topSet(e.sets);return '<div><span>'+esc(e.name)+'</span><span>'+e.sets.length+'×'+(t?t.reps+' · '+fmtW(t.kg):'')+'</span></div>';}).join('')+(ex.length>3?'<div><span class="note">+ '+(ex.length-3)+' exercícios</span><span></span></div>':'')+'</div>'+
     '<div class="pact">'+likeBtn(p.id)+'<button class="btn sm" data-act="post-open" data-id="'+p.id+'">Ver treino</button>'+(mine?'':'<button class="btn sm ghost" data-act="post-copy" data-id="'+p.id+'">Copiar treino</button>')+'</div></article>';
 }
 function localFeedHTML(note){
   var ps=posts();
-  return (note?'<p class="note">'+note+'</p>':'')+(ps.length?ps.map(function(p){return '<article class="card post"><div class="who"><span class="av me">'+esc((S.settings.name||'A').charAt(0).toUpperCase())+'</span><div><b>'+esc(p.title)+'</b><small>'+relTime(p.ts)+'</small></div></div><div class="pstats"><div><span class="lbl">Duração</span><b>'+fmtDur(p.dur)+'</b></div><div><span class="lbl">Volume</span><b>'+fmtVol(p.vol)+'</b></div></div><div class="pact"><button class="btn sm" data-act="wk-open" data-id="'+p.wid+'">Ver detalhes</button></div></article>';}).join(''):'<div class="card"><p class="empty">Seus treinos concluídos aparecem aqui.</p></div>');
+  return (note?'<p class="note">'+note+'</p>':'')+(ps.length?ps.map(function(p){return '<article class="card post"><div class="who">'+avHTML(null,true)+'<div><b>'+esc(p.title)+'</b><small>'+relTime(p.ts)+'</small></div></div><div class="pstats"><div><span class="lbl">Duração</span><b>'+fmtDur(p.dur)+'</b></div><div><span class="lbl">Volume</span><b>'+fmtVol(p.vol)+'</b></div></div><div class="pact"><button class="btn sm" data-act="wk-open" data-id="'+p.wid+'">Ver detalhes</button></div></article>';}).join(''):'<div class="card"><p class="empty">Seus treinos concluídos aparecem aqui.</p></div>');
 }
 function feedHTML(){
   if(!soc.prof)return localFeedHTML(soc.ok?'':'Sem conexão com a comunidade agora. Mostrando só os seus treinos.');
@@ -995,12 +1024,70 @@ function fbtn(id){
 }
 function updFbtn(id){document.querySelectorAll('[data-fbtn="'+id+'"]').forEach(function(el){el.innerHTML=fbtn(id);});}
 function personRow(p,extra){
-  return '<div class="card prow"><button class="avbtn" data-act="open-prof" data-id="'+p.id+'" aria-label="Ver perfil de '+esc(pname(p))+'"><span class="av">'+esc((pname(p)||'?').charAt(0).toUpperCase())+'</span></button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+p.id+'">'+esc(pname(p))+'</button><small>@'+esc(p.username)+(p.is_private?' · <span class="tag">Privado</span>':'')+'</small></div><div class="row">'+(extra||'<span data-fbtn="'+p.id+'">'+fbtn(p.id)+'</span>')+'</div></div>';
+  return '<div class="card prow"><button class="avbtn" data-act="open-prof" data-id="'+p.id+'" aria-label="Ver perfil de '+esc(pname(p))+'">'+avHTML(p,p.id===(user&&user.id))+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+p.id+'">'+esc(pname(p))+'</button><small>@'+esc(p.username)+(p.is_private?' · <span class="tag">Privado</span>':'')+'</small></div><div class="row">'+(extra||'<span data-fbtn="'+p.id+'">'+fbtn(p.id)+'</span>')+'</div></div>';
+}
+
+/* Avatar do Sistema (masculino/feminino) e corpo pelas medidas */
+var AV=window.ENGEFIT_AVATAR||null,NOAV=false;
+function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar');}
+var MED=[['cin','Cintura','cm',40,250,'84'],['qua','Quadril','cm',50,250,'98'],['pei','Peito','cm',50,250,'100'],['bra','Braço','cm',15,80,'34'],['cox','Coxa','cm',25,120,'56'],['gor','Gordura','%',3,70,'18']];
+function pnum(v){v=String(v==null?'':v).trim().replace(',','.');if(!v)return null;var n=parseFloat(v);return isNaN(n)?NaN:Math.round(n*10)/10;}
+function fmtMeas(x){var p=[];if(x.kg>0)p.push(fmtW(x.kg));MED.forEach(function(m){if(x[m[0]]>0)p.push(m[1].toLowerCase()+' '+num(x[m[0]],x[m[0]]%1?1:0)+(m[2]==='%'?'%':' cm'));});return p.join(' · ');}
+function myMeasures(){
+  var b=S.body.slice().sort(function(a,c){return a.d<c.d?1:-1;});
+  function last(k){for(var i=0;i<b.length;i++){if(b[i][k]>0)return b[i][k];}return 0;}
+  return {altura:+S.settings.altura||0,peso:last('kg'),cintura:last('cin'),quadril:last('qua'),peito:last('pei'),braco:last('bra'),coxa:last('cox'),gordura:last('gor')};
+}
+function myAv(){var a=S.settings.avatar;return a&&a.g?a:null;}
+function myRank(){return 'E';}
+function myShape(a){a=a||myAv()||{g:'m'};if(!AV||a.medidas===false)return {fat:0,mus:0,fonte:[]};return AV.shape(a.g,myMeasures());}
+function pubAvatar(){var a=myAv();if(!a)return null;var o={g:a.g,skin:a.skin,hair:a.hair,rank:myRank()};if(a.medidas!==false){var sh=myShape(a);o.fat=sh.fat;o.mus=sh.mus;}return o;}
+function avSVG(a,view,label){if(!AV||!a||!a.g)return '';return AV.svg({g:a.g,skin:a.skin,hair:a.hair,rank:a.rank,fat:a.fat,mus:a.mus,view:view,label:label});}
+function avHTML(p,me){
+  var a=me?pubAvatar():(p&&p.avatar),nm=me?(S.settings.name||'A'):pname(p);
+  if(a&&a.g&&AV)return '<span class="av has'+(me?' me':'')+'">'+avSVG(a,'head','Avatar de '+(nm||'pessoa'))+'</span>';
+  return '<span class="av'+(me?' me':'')+'">'+esc((nm||'?').charAt(0).toUpperCase())+'</span>';
+}
+var avT;
+function syncAvatar(){
+  clearTimeout(avT);avT=setTimeout(function(){
+    if(!sb||!user||!soc.prof||NOAV)return;
+    var a=pubAvatar()||{};if(JSON.stringify(a)===JSON.stringify(soc.prof.avatar||{}))return;
+    sb.from('profiles').update({avatar:a}).eq('id',user.id).then(function(r){if(r.error){if(/avatar/i.test(r.error.message||''))NOAV=true;return;}soc.prof.avatar=a;});
+  },700);
+}
+function statusWin(){
+  if(!AV)return '';
+  var a=myAv();
+  if(!a)return '<section class="sys statuswin" aria-label="Janela de status"><div class="avduo">'+avSVG({g:'m',rank:'E'},'full','Avatar masculino')+avSVG({g:'f',rank:'E'},'full','Avatar feminino')+'</div><div><p class="eyebrow">Janela de status</p><h2>'+esc(S.settings.name||'Atleta')+'</h2><p class="note" style="margin:8px 0 14px">Escolha seu personagem: masculino ou feminino, tom de pele e cabelo. O corpo acompanha as medidas que você registrar.</p><button class="btn primary" data-act="av-edit">Criar meu avatar</button></div></section>';
+  var sh=myShape(a),rk=myRank(),col=AV.AURA[rk];
+  return '<section class="sys statuswin" aria-label="Janela de status"><div class="avfull">'+avSVG(pubAvatar(),'full','Seu avatar')+'</div><div><p class="eyebrow">Janela de status</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
+    '<div class="row" style="margin:12px 0 2px;gap:12px;flex-wrap:nowrap"><span class="rank" style="color:'+col+'">'+rk+'</span><div><b>Rank '+rk+'</b><br><small class="note">Todo caçador começa no rank E.</small></div></div>'+
+    '<div class="swlist"><div class="swrow"><span class="lbl">Forma</span><b>'+AV.label(sh)+'</b></div><div class="swrow"><span class="lbl">Corpo</span><span>'+(a.medidas===false?'Padrão':sh.fonte.length?'Pelas suas medidas':'Padrão · sem medidas')+'</span></div></div>'+
+    '<div class="row"><button class="btn sm primary" data-act="av-edit">Personalizar avatar</button><button class="btn sm" data-act="ptab" data-v="body">Medidas</button></div></div></section>';
+}
+function avEdit(){
+  if(!AV)return;
+  var cur=myAv(),d={g:cur?cur.g:'m',skin:cur&&cur.skin||'clara',hair:cur&&cur.hair||'',medidas:!cur||cur.medidas!==false};
+  var SKN=[['clara','clara'],['media','média'],['morena','morena'],['escura','escura']];
+  function hair(){return d.hair||(d.g==='f'?'Vinho':'Grafite');}
+  function prev(){var sh=d.medidas?AV.shape(d.g,myMeasures()):{fat:0,mus:0};return avSVG({g:d.g,skin:d.skin,hair:hair(),rank:myRank(),fat:sh.fat,mus:sh.mus},'full','Prévia do avatar');}
+  pushModal({title:'Personalizar avatar',html:function(){
+    return head('Personalizar avatar')+'<div class="avpick"><div class="sys prev">'+prev()+'</div><div>'+
+      '<div class="lbl">Personagem</div><div class="seg" style="margin:7px 0 14px">'+[['m','Masculino'],['f','Feminino']].map(function(x){return '<button data-act="avd" data-k="g" data-v="'+x[0]+'" class="'+(d.g===x[0]?'on':'')+'" aria-pressed="'+(d.g===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
+      '<div class="lbl">Tom de pele</div><div class="swatches">'+SKN.map(function(x){var on=d.skin===x[0];return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.SKIN[x[0]][0]+'" data-act="avd" data-k="skin" data-v="'+x[0]+'" aria-label="Pele '+x[1]+'" aria-pressed="'+on+'"></button>';}).join('')+'</div>'+
+      '<div class="lbl">Cabelo</div><div class="swatches">'+Object.keys(AV.HAIR).map(function(k){var on=hair()===k;return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.HAIR[k][0]+'" data-act="avd" data-k="hair" data-v="'+k+'" aria-label="Cabelo '+k+'" aria-pressed="'+on+'" title="'+k+'"></button>';}).join('')+'</div>'+
+      '<label class="chkrow" style="margin:0"><input type="checkbox" id="avmed" data-act="avd" data-k="medidas"'+(d.medidas?' checked':'')+'><span><b>Corpo pelas medidas</b><br><small>O corpo do avatar acompanha o que você registra com a fita métrica.</small></span></label>'+
+      '</div></div><div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="av-save">Salvar avatar</button></div>';},
+    act:function(x,el){
+      if(x==='avd'){var k=el.dataset.k;if(k==='medidas')d.medidas=!!el.checked;else d[k]=el.dataset.v;drawModal();return true;}
+      if(x==='av-save'){S.settings.avatar={g:d.g,skin:d.skin,hair:hair(),medidas:d.medidas};save();syncAvatar();popModal();render();toast('Avatar salvo.');return true;}
+      return false;}});
 }
 
 /* Aba Pessoas */
 function vPessoas(){
-  var h=ph('Comunidade ENGEFIT','Pessoas')+'<div class="wrap">';
+  var h=ph('Comunidade ENGEFIT','Guilda')+'<div class="wrap">';
   if(!soc.prof)return h+'<div class="card"><p class="empty">Sem conexão com a comunidade agora. Tente de novo em instantes.</p></div></div>';
   return h+'<input type="search" id="pq" data-bind="pq" placeholder="Buscar por nome ou @usuário" aria-label="Buscar pessoas" value="'+esc(ui.pq||'')+'"><div id="plist" class="stack" style="margin-top:14px"></div></div>';
 }
@@ -1009,7 +1096,7 @@ function loadPeopleList(){
   var el=$('#plist');if(!el||!soc.prof)return;
   var g=++pgen,q=(ui.pq||'').trim().replace(/^@/,''),qq=q.replace(/[^\p{L}\p{N}_. ]/gu,'').slice(0,30);
   if(!el.innerHTML)el.innerHTML='<div class="spin" role="status" aria-label="Carregando"></div>';
-  var base=sb.from('profiles').select('id,username,name,is_private').neq('id',user.id);
+  var base=sb.from('profiles').select(pcols()).neq('id',user.id);
   var req=q?(qq?base.or('username.ilike.%'+qq+'%,name.ilike.%'+qq+'%').limit(30):Promise.resolve({data:[]})):base.order('created_at',{ascending:false}).limit(30);
   Promise.all([req,q?Promise.resolve():refreshRelations()]).then(function(rs){
     if(g!==pgen)return;var r=rs[0];if(r.error)throw r.error;
@@ -1052,6 +1139,7 @@ function openProfile(uid){
       if(!p)return head('Perfil')+'<div class="spin" role="status" aria-label="Carregando"></div>';
       var me=uid===user.id,vis=me||!p.is_private||soc.following[uid]==='accepted',s=st.stats||{};
       var h=head(pname(p))+'<p class="note" style="margin:-8px 0 14px">@'+esc(p.username)+(p.is_private?' · <span class="tag">Privado</span>':'')+'</p>';
+      var pa=me?pubAvatar():p.avatar;if(pa&&pa.g&&AV)h+='<div class="sys profav">'+avSVG(pa,'bust','Avatar de '+pname(p))+'</div>';
       h+='<div class="kv"><div class="tile"><span class="lbl">Treinos</span><b>'+(s.workouts!=null?s.workouts:'–')+'</b></div><div class="tile"><span class="lbl">Seguidores</span><b>'+(s.followers!=null?s.followers:'–')+'</b></div><div class="tile"><span class="lbl">Seguindo</span><b>'+(s.following!=null?s.following:'–')+'</b></div></div>';
       if(!me)h+='<div class="row" style="margin-bottom:16px"><span data-fbtn="'+uid+'">'+fbtn(uid)+'</span></div>';
       if(!vis)return h+'<div class="card"><p class="empty">Este perfil é privado. '+(soc.following[uid]==='pending'?'Seu pedido está aguardando aprovação.':'Siga para pedir acesso aos treinos.')+'</p></div>';
@@ -1067,7 +1155,7 @@ function openProfile(uid){
     reload:function(){load();}
   };
   function load(){
-    Promise.all([sb.from('profiles').select('id,username,name,is_private').eq('id',uid).maybeSingle(),sb.rpc('profile_stats',{uid:uid}),sb.from('posts').select('*').eq('user_id',uid).order('started_at',{ascending:false}).limit(30)]).then(function(rs){
+    Promise.all([sb.from('profiles').select(pcols()).eq('id',uid).maybeSingle(),sb.rpc('profile_stats',{uid:uid}),sb.from('posts').select('*').eq('user_id',uid).order('started_at',{ascending:false}).limit(30)]).then(function(rs){
       if(rs[0].error||!rs[0].data)throw 0;
       st.p=rs[0].data;soc.people[uid]=st.p;st.stats=rs[1].error?null:rs[1].data;st.posts=rs[2].error?[]:rs[2].data;
       st.posts.forEach(function(x){soc.posts[x.id]=x;});
@@ -1166,7 +1254,7 @@ function submitProfile(){
   var un=cleanUname(d.un.replace(/^@/,''));
   if(!UNAME.test(un)){authMsg=['err','Nome de usuário: de 3 a 20 caracteres, só letras minúsculas, números, ponto e _.'];showAuth();return;}
   var b=$('#asub');b.disabled=true;b.textContent='Aguarde…';
-  sb.from('profiles').insert({id:user.id,username:un,name:d.name||S.settings.name||'Atleta',is_private:d.priv}).select('id,username,name,is_private').single().then(function(r){
+  sb.from('profiles').insert({id:user.id,username:un,name:d.name||S.settings.name||'Atleta',is_private:d.priv}).select(pcols()).single().then(function(r){
     if(r.error)throw r.error;
     soc.prof=r.data;soc.ok=true;soc.people[user.id]=soc.prof;
     if(d.name)S.settings.name=d.name;
@@ -1303,7 +1391,7 @@ function bucketWeeks(n){
 function vPerfil(){
   var tw=S.workouts.length,tv=0,ts=0,td=0,tp=0;
   S.workouts.forEach(function(w){var s=wkStats(w);tv+=s.vol;ts+=s.sets;td+=w.dur;tp+=w.prs||0;});
-  var h=ph('Perfil · '+(user?user.email:''),S.settings.name||'Atleta')+'<div class="wrap"><div id="mysoc">'+mySocHTML()+'</div>';
+  var h=ph('Status · '+(user?user.email:''),S.settings.name||'Atleta')+'<div class="wrap">'+statusWin()+'<div id="mysoc">'+mySocHTML()+'</div>';
   h+='<div class="tiles"><div class="tile"><span class="lbl">Treinos</span><b>'+tw+'</b></div><div class="tile"><span class="lbl">Volume total</span><b>'+fmtVol(tv)+'</b></div><div class="tile"><span class="lbl">Séries</span><b>'+ts+'</b></div><div class="tile"><span class="lbl">Tempo treinado</span><b>'+(td?Math.round(td/3600)+' h':'0 h')+'</b></div></div>';
   h+='<div class="scroll-x" style="margin:20px 0 16px"><div class="seg">'+[['stats','Estatísticas'],['cal','Calendário'],['body','Corpo'],['tools','Ferramentas'],['cfg','Ajustes']].map(function(t){return '<button data-act="ptab" data-v="'+t[0]+'" class="'+(ui.ptab===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div></div>';
   h+=({stats:pStats,cal:pCal,body:pBody,tools:pTools,cfg:pCfg}[ui.ptab])();
@@ -1341,9 +1429,24 @@ function wkDetail(id){
       return false;}});
 }
 function pBody(){
-  var b=S.body.slice().sort(function(a,c){return a.d<c.d?-1:1;});
-  var pts=b.map(function(x){return {l:x.d.slice(8)+'/'+x.d.slice(5,7),v:conv(x.kg)};});
-  return '<div class="card"><div class="lbl" style="margin-bottom:6px">Peso corporal ('+unit()+')</div>'+lineChart(pts,function(v){return num(v,1);})+'</div><div class="card" style="margin-top:14px"><h3 style="margin-bottom:10px">Registrar peso</h3><div class="row"><label class="fl" style="margin:0;flex:1;min-width:130px">Data<input type="date" id="bd" value="'+dkey(Date.now())+'"></label><label class="fl" style="margin:0;flex:1;min-width:110px">Peso ('+unit()+')<input id="bw" inputmode="decimal" placeholder="0,0"></label><button class="btn primary" style="align-self:flex-end" data-act="body-add">Registrar</button></div></div><div class="card" style="margin-top:14px">'+(b.length?b.slice().reverse().slice(0,8).map(function(x){return '<div class="pr"><span>'+new Date(x.d+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})+'</span><span><b class="mono">'+fmtW(x.kg)+'</b> <button class="x" data-act="body-del" data-v="'+x.d+'" aria-label="Remover registro">×</button></span></div>';}).join(''):'<p class="empty">Nenhum registro de peso.</p>')+'</div>';
+  var b=S.body.slice().sort(function(a,c){return a.d<c.d?-1:1;}),wb=b.filter(function(x){return x.kg>0;});
+  var pts=wb.map(function(x){return {l:x.d.slice(8)+'/'+x.d.slice(5,7),v:conv(x.kg)};});
+  var a=myAv(),sh=myShape(a),h='';
+  if(a&&AV){
+    var fn={gordura:'% de gordura',cintura:'cintura e altura',peso:'peso e altura',braco:'braço',peito:'peito e cintura',coxa:'coxa'};
+    h+='<section class="sys bodyav" aria-label="Corpo do avatar"><div>'+avSVG(pubAvatar(),'full','Seu avatar com as medidas atuais')+'</div><div><p class="eyebrow">Corpo do avatar</p><h3 style="font-size:22px">'+AV.label(sh)+'</h3><p class="note" style="margin:6px 0 0">'+
+      (a.medidas===false?'O corpo pelas medidas está desligado. Ligue em Personalizar avatar.':sh.fonte.length?'Calculado por: '+sh.fonte.map(function(k){return fn[k];}).join(', ')+'. Registre de novo quando mudar e o avatar acompanha.':'Registre altura com cintura (ou % de gordura) e o braço para o corpo do avatar acompanhar você.')+'</p></div></section>';
+  }else if(AV)h+='<div class="card" style="margin-bottom:14px"><p style="margin:0 0 10px">Crie seu avatar e ele vai ganhar a forma das suas medidas.</p><button class="btn sm primary" data-act="av-edit">Criar meu avatar</button></div>';
+  h+='<div class="card"><h3 style="margin-bottom:4px">Registrar medidas</h3><p class="note" style="margin-bottom:12px">Use fita métrica, de manhã, sem apertar a pele. Preencha só o que quiser.</p><div class="measures">'+
+    '<label class="fl">Data<input type="date" id="bd" value="'+dkey(Date.now())+'"></label>'+
+    '<label class="fl">Altura (cm)<input id="bm-alt" inputmode="decimal" placeholder="175" value="'+(S.settings.altura?num(S.settings.altura,0):'')+'"></label>'+
+    '<label class="fl">Peso ('+unit()+')<input id="bw" inputmode="decimal" placeholder="0,0"></label>'+
+    MED.map(function(m){return '<label class="fl">'+m[1]+' ('+m[2]+')<input id="bm-'+m[0]+'" inputmode="decimal" placeholder="'+m[5]+'"></label>';}).join('')+
+    '</div><details class="howto"><summary>Como medir</summary><ul><li><b>Cintura:</b> na altura do umbigo, ao final de uma expiração normal.</li><li><b>Quadril:</b> na parte mais larga do glúteo, pés juntos.</li><li><b>Peito:</b> na linha dos mamilos, braços relaxados.</li><li><b>Braço:</b> no meio do braço, relaxado ao lado do corpo.</li><li><b>Coxa:</b> no meio da coxa, em pé.</li><li><b>Gordura:</b> só se você tiver de bioimpedância ou avaliação física.</li></ul></details>'+
+    '<button class="btn primary" data-act="body-add">Registrar</button></div>';
+  h+='<div class="card" style="margin-top:14px"><div class="lbl" style="margin-bottom:6px">Peso corporal ('+unit()+')</div>'+lineChart(pts,function(v){return num(v,1);})+'</div>';
+  h+='<div class="card" style="margin-top:14px"><h3 style="margin-bottom:8px">Histórico</h3>'+(b.length?b.slice().reverse().slice(0,10).map(function(x){return '<div class="pr"><span>'+new Date(x.d+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})+'<br><small class="note">'+esc(fmtMeas(x))+'</small></span><span><button class="x" data-act="body-del" data-v="'+x.d+'" aria-label="Remover registro">×</button></span></div>';}).join(''):'<p class="empty">Nenhuma medida registrada.</p>')+'</div>';
+  return h;
 }
 function pTools(){
   return '<div class="card"><h3 style="margin-bottom:4px">Calculadora de 1RM</h3><p class="note" style="margin-bottom:12px">Estimativa de uma repetição máxima pela fórmula de Epley.</p><div class="row"><label class="fl" style="margin:0;flex:1;min-width:110px">Carga ('+unit()+')<input id="t1k" data-bind="t1" inputmode="decimal" placeholder="80"></label><label class="fl" style="margin:0;flex:1;min-width:110px">Repetições<input id="t1r" data-bind="t1" inputmode="numeric" placeholder="8"></label></div><div id="t1out" style="margin-top:14px"></div></div>'+
@@ -1373,8 +1476,8 @@ var NAV=[
 ['inicio','Início','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>'],
 ['treino','Treino','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>'],
 ['exercicios','Exercícios','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>'],
-['pessoas','Pessoas','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.2 14.3c1.9.7 3.3 2.6 3.3 5.7"/></svg>'],
-['perfil','Perfil','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>']
+['pessoas','Guilda','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.2 14.3c1.9.7 3.3 2.6 3.3 5.7"/></svg>'],
+['perfil','Status','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>']
 ];
 function buildNav(){var h=NAV.map(function(n){return '<a href="#'+n[0]+'" data-nav="'+n[0]+'">'+n[2]+'<span>'+n[1]+'</span></a>';}).join('');$('#navside').innerHTML=h;$('#navtabs').innerHTML=h;}
 function route(){var h=location.hash.slice(1);ui.view=['inicio','treino','exercicios','pessoas','perfil'].indexOf(h)>-1?h:'inicio';}
@@ -1458,8 +1561,19 @@ var ACT={
  'cal-day':function(el){ui.calSel=el.dataset.v;render();},
  'wk-open':function(el){wkDetail(el.dataset.id);},
  'unit':function(el){S.settings.unit=el.dataset.v;save();render();},
- 'body-add':function(){var d=$('#bd').value,kg=toKg($('#bw').value);if(!d||!(kg>0)){toast('Informe data e peso.');return;}S.body=S.body.filter(function(x){return x.d!==d;});S.body.push({d:d,kg:kg});save();render();toast('Peso registrado.');},
- 'body-del':function(el){S.body=S.body.filter(function(x){return x.d!==el.dataset.v;});save();render();},
+ 'body-add':function(){var d=$('#bd').value;if(!d){toast('Informe a data.');return;}
+   var rec={d:d},n=0,bad='',alt=pnum($('#bm-alt').value);
+   if(alt!=null&&(alt<100||alt>250))bad='Altura';
+   var kg=toKg($('#bw').value);if(kg>0){if(kg<25||kg>350)bad=bad||'Peso';rec.kg=kg;n++;}
+   MED.forEach(function(m){var v=pnum($('#bm-'+m[0]).value);if(v!=null){if(v<m[3]||v>m[4])bad=bad||m[1];rec[m[0]]=v;n++;}});
+   if(bad){toast(bad+': confira o valor.');return;}
+   var altCh=alt!=null&&alt!==+S.settings.altura;
+   if(!n&&!altCh){toast('Preencha pelo menos uma medida.');return;}
+   if(altCh)S.settings.altura=alt;
+   if(n){var old=S.body.filter(function(x){return x.d===d;})[0]||{};S.body=S.body.filter(function(x){return x.d!==d;});S.body.push(Object.assign({},old,rec));}
+   save();syncAvatar();render();toast('Medidas registradas.');},
+ 'av-edit':function(){avEdit();},
+ 'body-del':function(el){S.body=S.body.filter(function(x){return x.d!==el.dataset.v;});save();syncAvatar();render();},
  'wipe':function(){confirmM('Apagar todos os meus dados','Treinos, histórico, rotinas, exercícios criados e registros de peso serão apagados da sua conta. Não dá para desfazer.','Apagar tudo',function(){var st=S.settings;S=blank();S.settings=st;S.pendingWipe=true;rest=null;save();flushPosts();render();toast('Dados apagados.');},true);},
  'copy-data':function(){
    var txt=JSON.stringify(S);

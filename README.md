@@ -30,3 +30,8 @@ Cada pessoa cria conta com e-mail e senha. Os treinos ficam no Supabase (tabela 
 
 ---
 Atualizações são enviadas por commits neste repositório; a Vercel publica sozinha.
+
+## Avatares
+
+`avatar.js` desenha os avatares do Sistema (masculino e feminino, arte vetorial original). O corpo acompanha as medidas registradas na aba Corpo (altura, cintura ou % de gordura, braço, peito, coxa).
+Para os outros verem seu avatar, rode `supabase/avatar.sql` uma vez no SQL Editor do Supabase.
