@@ -242,7 +242,8 @@ body.authmode .app,body.authmode .tabs,body.authmode #dock{display:none}
 svg.thumb,.thumb-ph{width:56px;height:47px;background:var(--surface2);border-radius:8px;grid-row:1/3;grid-column:1}
 .thumb-ph{display:grid;place-items:center;font:600 16px var(--display);color:var(--muted)}
 .exitem .exname{grid-column:2}
-svg.demo{width:100%;height:auto;display:block;max-height:280px}
+svg.demo{width:100%;height:auto;display:block;max-height:300px;border-radius:8px}
+.mdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:0}.mdot.p{background:#e0283f}.mdot.s{background:#f2788a}
 .demo-box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 8px 4px;margin-bottom:10px}
 .demo-ctl{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 4px 2px}
 .demo-frames{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
@@ -362,6 +363,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="/vendor/supabase.js"></script>
+<script src="/exart.js"></script>
 <script src="/demos.js"></script>
 <script src="/avatar.js"></script>
 <script>
@@ -843,6 +845,8 @@ function howHTML(x){
   if(DM.has(x.id)){
     h+='<div class="demo-box"><div id="demo-anim">'+DM.svg(x.id,0,'demo')+'</div><div class="demo-ctl"><span class="lbl">Demonstração ilustrada</span><button class="btn sm ghost" id="demo-btn" data-act="demo-toggle" aria-pressed="true">Pausar</button></div></div>';
     h+='<div class="demo-frames"><figure>'+DM.svg(x.id,0,'demo')+'<figcaption>Início</figcaption></figure><figure>'+DM.svg(x.id,1,'demo')+'<figcaption>Fim</figcaption></figure></div>';
+    var mu=DM.muscles&&DM.muscles(x.id);
+    if(mu)h+='<div class="card musc" style="margin-bottom:14px"><div class="lbl" style="margin-bottom:8px">Músculos trabalhados</div><p style="margin:0 0 6px"><span class="mdot p" aria-hidden="true"></span><b>Principal:</b> '+esc(mu.p.join(', '))+'</p>'+(mu.s.length?'<p style="margin:0"><span class="mdot s" aria-hidden="true"></span><b>Auxiliares:</b> '+esc(mu.s.join(', '))+'</p>':'')+'</div>';
   }else h+='<div class="card" style="margin-bottom:14px"><p class="note">Exercício criado por você: ainda sem demonstração ilustrada.</p></div>';
   if(st)h+='<h3 style="margin-bottom:8px">Passo a passo</h3><ol class="isteps">'+st.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ol>';
   h+='<div class="row" style="margin-top:4px"><a class="btn sm" href="'+yt+'" target="_blank" rel="noopener">Ver vídeos no YouTube</a></div><p class="note" style="margin-top:8px">Os vídeos abrem no YouTube, de outros criadores. Na dúvida sobre a execução, peça orientação a um profissional de educação física.</p>';
