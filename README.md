@@ -35,3 +35,8 @@ Atualizações são enviadas por commits neste repositório; a Vercel publica so
 
 `avatar.js` desenha os avatares do Sistema (masculino e feminino, arte vetorial original). O corpo acompanha as medidas registradas na aba Corpo (altura, cintura ou % de gordura, braço, peito, coxa).
 Para os outros verem seu avatar, rode `supabase/avatar.sql` uma vez no SQL Editor do Supabase.
+
+## Login sem e-mail
+
+As contas entram com nome de usuário e senha. O Supabase exige um e-mail por conta, então o app usa um endereço técnico derivado do @usuário (`lucas.fit` vira `lucas-fit@engefit.vercel.app`), que não existe e não recebe nada.
+Para ligar: em Authentication > Sign In / Providers > Email, desligue "Confirm email"; depois rode `supabase/usuario.sql` uma vez.
