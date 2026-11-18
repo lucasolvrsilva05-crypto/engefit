@@ -375,6 +375,12 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .wday span{font-size:11px;color:var(--muted);text-transform:uppercase}.wday b{font-size:12px;line-height:1.2}.wday.tr{border-color:rgba(63,184,255,.45)}.wday.now{box-shadow:0 0 0 1px var(--accent),0 0 14px rgba(63,184,255,.35)}
 .wday .btn{padding:4px 6px;font-size:11px}
 @media (max-width:560px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{grid-template-columns:86px 1fr}}
+
+.lpos{font-size:16px;min-width:30px;color:var(--muted)}.lrow.top .lpos{color:#fbbf24}
+.lrow.me{border-color:var(--accent);box-shadow:0 0 0 1px rgba(63,184,255,.35)}
+.lrow{flex-wrap:nowrap}.lrow .pinfo{min-width:0}.lrow .namebtn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.lstat{display:flex;align-items:center;gap:10px;text-align:right}.lstat span{display:grid}.lstat small{color:var(--muted);font-size:12px}
+.rank.sm{width:32px;height:32px;font-size:18px}
 </style>
 </head>
 <body>
@@ -1094,7 +1100,7 @@ function myMeasures(){
 function myAv(){var a=S.settings.avatar;return a&&a.g?a:null;}
 function myRank(){return S&&S.workouts?levelInfo().rank:'E';}
 function myShape(a){a=a||myAv()||{g:'m'};if(!AV||a.medidas===false)return {fat:0,mus:0,fonte:[]};return AV.shape(a.g,myMeasures());}
-function pubAvatar(){var a=myAv();if(!a)return null;var o={g:a.g,skin:a.skin,hair:a.hair,rank:myRank()};if(a.medidas!==false){var sh=myShape(a);o.fat=sh.fat;o.mus=sh.mus;}return o;}
+function pubAvatar(){var a=myAv(),L=levelInfo(),o={rank:L.rank,lv:L.lv,xp:L.xp};if(!a)return o;o.g=a.g;o.skin=a.skin;o.hair=a.hair;if(a.medidas!==false){var sh=myShape(a);o.fat=sh.fat;o.mus=sh.mus;}return o;}
 function avSVG(a,view,label){if(!AV||!a||!a.g)return '';return AV.svg({g:a.g,skin:a.skin,hair:a.hair,rank:a.rank,fat:a.fat,mus:a.mus,view:view,label:label});}
 function avHTML(p,me){
   var a=me?pubAvatar():(p&&p.avatar),nm=me?(S.settings.name||'A'):pname(p);
@@ -1184,10 +1190,10 @@ var PLAN_T={
   fbC:['Corpo inteiro C',[['agachamento-bulgaro','c'],['flexao-joelhos','a'],['superman','a'],['rosca-alternada','a'],['elevacao-pernas','a'],['escalador','t']]]
  }
 };
-var SPLITS={fb:['Corpo inteiro','Todos os músculos em cada treino. Ideal para 2 ou 3 dias.',[2,3]],ul:['Superior / Inferior','Alterna parte de cima e pernas. Ideal para 4 dias.',[2,3,4,5,6]],ppl:['Push / Pull / Legs','Empurrar, puxar e pernas. Ideal para 5 ou 6 dias.',[3,4,5,6]]};
-var SPLIT_SEQ={fb:['fbA','fbB','fbC'],ul:['upA','loA','upB','loB'],ppl:['push','pull','legs']};
-var WD_DEF={2:[1,4],3:[1,3,5],4:[1,2,4,5],5:[1,2,3,4,5],6:[1,2,3,4,5,6]};
-function recSplit(n){return n<=3?'fb':n===4?'ul':'ppl';}
+var SPLITS={fb:['Corpo inteiro','Todos os músculos em cada treino. Ideal para 2 ou 3 dias.',[2,3]],up:['Só superiores','Peito, costas, ombros e braços. Alterna os treinos A e B.',[1,2,3,4,5,6]],lo:['Só inferiores','Pernas, glúteos e abdômen. Alterna os treinos A e B.',[1,2,3,4,5,6]],ul:['Superior / Inferior','Alterna parte de cima e pernas. Ideal para 4 dias.',[2,3,4,5,6]],ppl:['Push / Pull / Legs','Empurrar, puxar e pernas. Ideal para 5 ou 6 dias.',[3,4,5,6]]};
+var SPLIT_SEQ={fb:['fbA','fbB','fbC'],up:['upA','upB'],lo:['loA','loB'],ul:['upA','loA','upB','loB'],ppl:['push','pull','legs']};
+var WD_DEF={1:[3],2:[1,4],3:[1,3,5],4:[1,2,4,5],5:[1,2,3,4,5],6:[1,2,3,4,5,6]};
+function recSplit(n){return n===1?'up':n<=3?'fb':n===4?'ul':'ppl';}
 function repsFor(kind,id){
   var g=myGoal(),bw=(exById(id).e==='Peso do corpo');
   if(kind==='t')return id==='polichinelo'?[3,40]:[3,30];
@@ -1209,9 +1215,9 @@ function planGen(){
     var h=head('Criar rotina automática');
     if(st.step===0){
       h+='<p class="note" style="margin:-6px 0 14px">O Sistema monta seu plano e as missões diárias seguem esses dias. Nos dias de descanso, a missão é bater passos e água.</p>';
-      h+='<div class="lbl">Quantos dias por semana você pode treinar?</div><div class="seg" style="margin:8px 0 16px">'+[2,3,4,5,6].map(function(k){return '<button data-act="pg-n" data-v="'+k+'" class="'+(st.n===k?'on':'')+'" aria-pressed="'+(st.n===k)+'">'+k+'</button>';}).join('')+'</div>';
+      h+='<div class="lbl">Quantos dias por semana você pode treinar?</div><div class="seg" style="margin:8px 0 16px">'+[1,2,3,4,5,6].map(function(k){return '<button data-act="pg-n" data-v="'+k+'" class="'+(st.n===k?'on':'')+'" aria-pressed="'+(st.n===k)+'">'+k+'</button>';}).join('')+'</div>';
       h+='<div class="lbl">Onde você vai treinar?</div><div class="seg" style="margin:8px 0 6px">'+[['academia','Academia'],['casa','Em casa']].map(function(x){return '<button data-act="pg-loc" data-v="'+x[0]+'" class="'+(st.loc===x[0]?'on':'')+'" aria-pressed="'+(st.loc===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+(st.loc==='casa'?'<p class="note" style="margin:0 0 16px">Em casa: peso do corpo e um par de halteres. Uma cadeira firme serve de banco.</p>':'<div style="height:12px"></div>');
-      h+='<div class="lbl">Divisão</div><div class="goals" role="radiogroup" aria-label="Divisão">'+Object.keys(SPLITS).map(function(k){var s=SPLITS[k],ok=s[2].indexOf(st.n)>-1,on=st.split===k;return '<button class="goal'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" data-act="pg-split" data-v="'+k+'"'+(ok?'':' disabled')+'><b>'+s[0]+(k===recSplit(st.n)?' · recomendado':'')+'</b><small>'+(ok?s[1]:'Não serve para '+st.n+' dias.')+'</small></button>';}).join('')+'</div>';
+      h+='<div class="lbl">Divisão</div><div class="goals" role="radiogroup" aria-label="Divisão">'+Object.keys(SPLITS).map(function(k){var s=SPLITS[k],ok=s[2].indexOf(st.n)>-1,on=st.split===k;return '<button class="goal'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" data-act="pg-split" data-v="'+k+'"'+(ok?'':' disabled')+'><b>'+s[0]+(k===recSplit(st.n)&&k!=='up'?' · recomendado':'')+'</b><small>'+(ok?s[1]:'Não serve para '+st.n+' dias.')+'</small></button>';}).join('')+'</div>';
       h+='<div class="lbl">Dias da semana</div><div class="wdpick">'+[1,2,3,4,5,6,0].map(function(d){var on=st.wd.indexOf(d)>-1;return '<button class="chip'+(on?' on':'')+'" data-act="pg-wd" data-v="'+d+'" aria-pressed="'+on+'">'+WD[d]+'</button>';}).join('')+'</div><p class="note" style="margin:6px 0 16px">'+st.wd.length+' de '+st.n+' dias escolhidos.</p>';
       h+='<div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="pg-preview"'+(st.wd.length===st.n?'':' disabled')+'>Ver plano</button></div>';
     }else{
@@ -1417,10 +1423,29 @@ function goalEdit(){
 function vPessoas(){
   var h=ph('Comunidade ENGEFIT','Guilda')+'<div class="wrap">';
   if(!soc.prof)return h+'<div class="card"><p class="empty">Sem conexão com a comunidade agora. Tente de novo em instantes.</p></div></div>';
+  var tab=ui.gtab||'pessoas';
+  h+='<div class="seg" role="tablist" style="margin-bottom:14px">'+[['pessoas','Pessoas'],['rank','Ranking geral']].map(function(x){return '<button role="tab" data-act="gtab" data-v="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'" aria-selected="'+(tab===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>';
+  if(tab==='rank')return h+'<p class="note" style="margin:-4px 0 12px">Ordem: maior nível primeiro; no empate, quem tem mais XP.</p><div id="rlist" class="stack"></div></div>';
   return h+'<input type="search" id="pq" data-bind="pq" placeholder="Buscar por nome ou @usuário" aria-label="Buscar pessoas" value="'+esc(ui.pq||'')+'"><div id="plist" class="stack" style="margin-top:14px"></div></div>';
 }
-var pgen=0,ptimer=null;
+var pgen=0,ptimer=null,rgen=0;
+function loadRanking(){
+  var el=$('#rlist');if(!el||!soc.prof)return;
+  var g=++rgen;if(!el.innerHTML)el.innerHTML='<div class="spin" role="status" aria-label="Carregando"></div>';
+  sb.from('profiles').select(pcols()).limit(1000).then(function(r){
+    if(g!==rgen)return;if(r.error)throw r.error;
+    var me=pubAvatar(),rows=r.data.map(function(p){var a=p.id===user.id?me:(p.avatar||{});soc.people[p.id]=p;return {p:p,a:a,lv:+a.lv||1,xp:+a.xp||0};});
+    rows.sort(function(x,y){return y.lv-x.lv||y.xp-x.xp||pname(x.p).localeCompare(pname(y.p));});
+    var mine=-1;rows.forEach(function(x,i){if(x.p.id===user.id)mine=i;});
+    function row(x,i){var rk=x.a.rank||rankOf(x.lv),col=AV?AV.AURA[rk]:'#9aa4b5',me2=x.p.id===user.id;
+      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+'</small></div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span><b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small></span></div></div>';}
+    var h=rows.slice(0,50).map(row).join('');
+    if(mine>=50)h+='<p class="note" style="text-align:center">…</p>'+row(rows[mine],mine);
+    el.innerHTML=h||'<p class="empty">Ainda não há jogadores no ranking.</p>';
+  }).catch(function(){if(g===rgen)el.innerHTML='<p class="empty">Não deu para carregar o ranking. Verifique sua conexão.</p>';});
+}
 function loadPeopleList(){
+  if(ui.gtab==='rank'){loadRanking();return;}
   var el=$('#plist');if(!el||!soc.prof)return;
   var g=++pgen,q=(ui.pq||'').trim().replace(/^@/,''),qq=q.replace(/[^\p{L}\p{N}_. ]/gu,'').slice(0,30);
   if(!el.innerHTML)el.innerHTML='<div class="spin" role="status" aria-label="Carregando"></div>';
@@ -1824,6 +1849,7 @@ function drawMini(){
   el.innerHTML=(S.active&&ui.view!=='treino')?'<a class="mini" href="#treino"><span class="dot"></span><span>Treino em andamento</span><b id="minic">'+clock(elapsed())+'</b><span class="go">Retomar</span></a>':'';
 }
 function render(){
+  if(user&&soc.prof)syncAvatar();
   var y=window.scrollY;
   document.querySelectorAll('[data-nav]').forEach(function(a){var on=a.dataset.nav===ui.view;a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   $('#view').innerHTML=({inicio:vInicio,treino:vTreino,exercicios:vExercicios,pessoas:vPessoas,perfil:vPerfil})[ui.view]();
@@ -1915,6 +1941,7 @@ var ACT={
  'water':function(el){var r=dayRec(today());r.w=Math.max(0,(r.w||0)+(+el.dataset.v));trimDaily();save();render();},
  'steps-save':function(){var v=parseInt(String($('#qsteps').value).replace(/\D/g,''),10);if(isNaN(v)||v<0||v>100000){toast('Passos: confira o valor.');return;}dayRec(today()).st=v;trimDaily();save();render();toast('Passos salvos.');},
  'plan-gen':function(){planGen();},
+ 'gtab':function(el){ui.gtab=el.dataset.v;render();},
  'chal':function(el){var r=dayRec(today()),k=el.dataset.p==='1'?'pc':'ch',i=+el.dataset.v;r[k]=r[k]||[];var j=r[k].indexOf(i);if(j>-1)r[k].splice(j,1);else r[k].push(i);if(k==='pc'&&r.pc.length>=4)r.pd=1;trimDaily();var before=levelInfo().lv;save();render();var L=levelInfo();if(L.lv>before)toast('Nível '+L.lv+'! Rank '+L.rank+'.');},
  'body-del':function(el){S.body=S.body.filter(function(x){return x.d!==el.dataset.v;});save();syncAvatar();render();},
  'wipe':function(){confirmM('Apagar todos os meus dados','Treinos, histórico, rotinas, exercícios criados e registros de peso serão apagados da sua conta. Não dá para desfazer.','Apagar tudo',function(){var st=S.settings;S=blank();S.settings=st;S.pendingWipe=true;rest=null;save();flushPosts();render();toast('Dados apagados.');},true);},
