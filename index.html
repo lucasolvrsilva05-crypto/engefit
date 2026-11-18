@@ -341,6 +341,26 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .bodyav svg{width:100%;height:auto;display:block}
 .profav{width:120px;margin:0 0 14px;padding:4px}.profav svg{width:100%;height:auto;display:block}
 @media (max-width:560px){.statuswin{grid-template-columns:118px 1fr;gap:12px;padding:12px}.statuswin h2{font-size:21px}.avpick{grid-template-columns:112px 1fr;gap:12px}}
+
+.quest{padding:16px 18px;margin-bottom:16px}.quest.clear{border-color:#4ade80;box-shadow:0 0 0 1px rgba(74,222,128,.2),0 0 28px rgba(74,222,128,.25)}
+.qhead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:4px 12px;margin-bottom:10px}.qhead .eyebrow{grid-column:1/3;margin:0}.qhead h2{font-size:20px;margin:0}.qcount{font-size:18px;color:var(--accent)}
+.qlist{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.q{border-top:1px solid var(--line);padding-top:10px}.q:first-child{border-top:0;padding-top:0}
+.qrow{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center}
+.qchk{width:20px;height:20px;border:1.5px solid var(--accent);border-radius:3px;display:grid;place-items:center;font-size:13px;color:#041322}
+.q.ok .qchk{background:var(--good);border-color:var(--good)}.q.ok .qt{color:var(--muted);text-decoration:line-through}
+.qv{font-size:13px;color:var(--muted)}
+.qbar{height:6px;background:#0d1a30;border-radius:3px;margin:8px 0 0 32px;overflow:hidden}.qbar i{display:block;height:100%;background:linear-gradient(90deg,#3fb8ff,#7fd3ff);box-shadow:0 0 10px #3fb8ff}
+.q.ok .qbar i{background:var(--good);box-shadow:none}
+.qn{margin:6px 0 0 32px;font-size:13px}.qact{margin:8px 0 0 32px;gap:8px}
+.onbbox{width:min(520px,100%)}.onbcard{padding:20px}.onbcard h1{font-size:26px;margin:2px 0 8px}
+.onbdots{display:flex;gap:6px;justify-content:center}.onbdots i{width:26px;height:4px;border-radius:2px;background:var(--line)}.onbdots i.on{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.onbduo{max-width:260px;margin:4px auto 16px}.onbduo svg{width:100%;height:auto}
+.onbav{width:110px;margin:4px 0 10px}.onbav svg{width:100%;height:auto;border-radius:6px}
+.goals{display:grid;gap:8px;margin:12px 0 16px}
+.goal{display:grid;gap:2px;text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:12px 14px;color:var(--ink);cursor:pointer}
+.goal b{font-family:var(--display);font-size:16px}.goal small{color:var(--muted)}
+.goal.on{border-color:var(--accent);background:rgba(63,184,255,.12);box-shadow:0 0 0 1px rgba(63,184,255,.4)}
 </style>
 </head>
 <body>
@@ -490,7 +510,7 @@ var SUPABASE_KEY='sb_publishable_iGzoPW7N-MmF_YMHOYNMfA_KDWgxIqN';
 var S=blank(),sb=null,user=null,authMode='login',authMsg=null,authUser='';
 var ui={view:'inicio',exq:'',exm:'',exe:'',exl:'',ptab:'stats',weeks:8,calM:new Date(),calSel:null,libN:'',libL:'',libG:''};
 var rest=null;
-function blank(){return {v:2,settings:{unit:'kg',rest:90,name:'Atleta'},routines:[],workouts:[],custom:[],body:[],active:null,pendingPosts:[],pendingDel:[],pendingWipe:false};}
+function blank(){return {v:2,settings:{unit:'kg',rest:90,name:'Atleta'},routines:[],workouts:[],custom:[],body:[],daily:{},active:null,pendingPosts:[],pendingDel:[],pendingWipe:false};}
 function normalize(o){
   var b=blank();if(!o||typeof o!=='object')return b;
   for(var k in b){if(o[k]==null)o[k]=b[k];}
@@ -657,12 +677,13 @@ function finishEnter(fresh){
   if(justSigned){justSigned=false;S.pendingPosts=S.workouts.map(function(w){return w.id;});save();}
   if(fresh||!location.hash||/access_token|type=|error/.test(location.hash)){try{history.replaceState(null,'',location.pathname+'#inicio');}catch(e){}window.scrollTo(0,0);}
   route();render();flushPosts();
+  if(needsOnboard())showOnboard();
 }
 function logout(){
   var go=function(){
     rest=null;stack=[];drawModal();
     try{if(user)localStorage.removeItem('engefit.u.'+user.id);}catch(e){}
-    user=null;S=blank();soc=socBlank();authDraft=null;sync.dirty=false;clearTimeout(sync.timer);authMsg=null;authUser='';
+    user=null;S=blank();soc=socBlank();authDraft=null;onb=null;sync.dirty=false;clearTimeout(sync.timer);authMsg=null;authUser='';
     ui={view:'inicio',exq:'',exm:'',exe:'',exl:'',ptab:'stats',weeks:8,calM:new Date(),calSel:null,libN:'',libL:'',libG:''};
     if(sb)sb.auth.signOut().catch(function(){});
     showAuth('login');
@@ -1081,8 +1102,8 @@ function statusWin(){
   var sh=myShape(a),rk=myRank(),col=AV.AURA[rk];
   return '<section class="sys statuswin" aria-label="Janela de status"><div class="avfull">'+avSVG(pubAvatar(),'full','Seu avatar')+'</div><div><p class="eyebrow">Janela de status</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
     '<div class="row" style="margin:12px 0 2px;gap:12px;flex-wrap:nowrap"><span class="rank" style="color:'+col+'">'+rk+'</span><div><b>Rank '+rk+'</b><br><small class="note">Todo caçador começa no rank E.</small></div></div>'+
-    '<div class="swlist"><div class="swrow"><span class="lbl">Forma</span><b>'+AV.label(sh)+'</b></div><div class="swrow"><span class="lbl">Corpo</span><span>'+(a.medidas===false?'Padrão':sh.fonte.length?'Pelas suas medidas':'Padrão · sem medidas')+'</span></div></div>'+
-    '<div class="row"><button class="btn sm primary" data-act="av-edit">Personalizar avatar</button><button class="btn sm" data-act="ptab" data-v="body">Medidas</button></div></div></section>';
+    '<div class="swlist"><div class="swrow"><span class="lbl">Objetivo</span><b>'+(S.settings.goal?goalName(S.settings.goal):'Não definido')+'</b></div><div class="swrow"><span class="lbl">Forma</span><b>'+AV.label(sh)+'</b></div><div class="swrow"><span class="lbl">Corpo</span><span>'+(a.medidas===false?'Padrão':sh.fonte.length?'Pelas suas medidas':'Padrão · sem medidas')+'</span></div></div>'+
+    '<div class="row"><button class="btn sm primary" data-act="av-edit">Personalizar avatar</button><button class="btn sm" data-act="goal-edit">Objetivo</button><button class="btn sm" data-act="ptab" data-v="body">Medidas</button></div></div></section>';
 }
 function avEdit(){
   if(!AV)return;
@@ -1101,6 +1122,125 @@ function avEdit(){
       if(x==='avd'){var k=el.dataset.k;if(k==='medidas')d.medidas=!!el.checked;else d[k]=el.dataset.v;drawModal();return true;}
       if(x==='av-save'){S.settings.avatar={g:d.g,skin:d.skin,hair:hair(),medidas:d.medidas};save();syncAvatar();popModal();render();toast('Avatar salvo.');return true;}
       return false;}});
+}
+
+/* ---------- Objetivo e missões diárias do Sistema ---------- */
+var GOALS=[
+  ['emagrecer','Emagrecer','Queimar gordura com treino, passos e cardio.'],
+  ['massa','Ganhar massa muscular','Aumentar o tamanho dos músculos com volume de treino.'],
+  ['forca','Ganhar força','Subir as cargas nos exercícios principais.'],
+  ['condicionamento','Condicionamento físico','Mais fôlego e resistência no dia a dia.'],
+  ['saude','Saúde e bem-estar','Movimento constante, sem pressa.']
+];
+var COMPOUND=['agachamento','supino-reto-barra','levantamento-terra','desenv-barra','remada-curvada','barra-fixa','leg-press','stiff'];
+function goalName(k){var g=GOALS.filter(function(x){return x[0]===k;})[0];return g?g[1]:'Saúde e bem-estar';}
+function myGoal(){return S.settings.goal||'saude';}
+function today(){return dkey(Date.now());}
+function dayRec(d){S.daily=S.daily||{};return S.daily[d]||(S.daily[d]={});}
+function waterGoal(){var kg=myMeasures().peso;var ml=kg>0?kg*35:2000;return Math.max(1500,Math.min(4000,Math.round(ml/250)*250));}
+function stepsGoal(){return {emagrecer:10000,condicionamento:9000,saude:8000,massa:7000,forca:7000}[myGoal()]||8000;}
+function todaysWorkouts(){var d=today();return S.workouts.filter(function(w){return dkey(w.start)===d;});}
+function missions(){
+  var d=today(),r=(S.daily&&S.daily[d])||{},g=myGoal(),ws=todaysWorkouts(),sets=0,comp=false,list=[];
+  ws.forEach(function(w){w.exs.forEach(function(e){if(COMPOUND.indexOf(e.ex)>-1&&e.sets.some(function(s){return s.done;}))comp=true;e.sets.forEach(function(s){if(s.done)sets++;});});});
+  var wk=S.workouts.filter(function(w){return w.start>=Date.now()-6*864e5;}).length,per=S.settings.days||3;
+  list.push({id:'steps',t:'Caminhar '+stepsGoal().toLocaleString('pt-BR')+' passos',v:r.st||0,goal:stepsGoal(),u:'passos'});
+  list.push({id:'water',t:'Beber '+num(waterGoal()/1000,waterGoal()%1000?2:0)+' L de água',v:r.w||0,goal:waterGoal(),u:'ml'});
+  list.push({id:'train',t:'Concluir um treino',v:ws.length?1:0,goal:1,u:'',note:wk+' de '+per+' treinos na semana'});
+  if(g==='emagrecer')list.push({id:'cardio',t:'20 min de cardio',v:r.cx?1:0,goal:1,u:'',check:1,note:'Caminhada rápida, bicicleta, corrida ou escada.'});
+  else if(g==='condicionamento')list.push({id:'cardio',t:'30 min de cardio',v:r.cx?1:0,goal:1,u:'',check:1,note:'Em ritmo que deixe a respiração acelerada.'});
+  else if(g==='massa')list.push({id:'vol',t:'Fazer 12 séries no treino',v:Math.min(sets,12),goal:12,u:'séries'});
+  else if(g==='forca')list.push({id:'comp',t:'Treinar um exercício base',v:comp?1:0,goal:1,u:'',note:'Agachamento, supino, terra, desenvolvimento, remada ou barra fixa.'});
+  else list.push({id:'stretch',t:'10 min de alongamento',v:r.cx?1:0,goal:1,u:'',check:1,note:'Pescoço, ombros, quadril e posteriores.'});
+  list.forEach(function(m){m.done=m.v>=m.goal;});
+  return list;
+}
+function missionsHTML(){
+  var ms=missions(),done=ms.filter(function(m){return m.done;}).length,all=done===ms.length;
+  var h='<section class="sys quest'+(all?' clear':'')+'" aria-labelledby="qt"><div class="qhead"><p class="eyebrow">Missão diária · '+goalName(myGoal())+'</p><h2 id="qt">'+(all?'Missão concluída':'Preparação para ficar mais forte')+'</h2><span class="qcount mono">'+done+'/'+ms.length+'</span></div><ul class="qlist">';
+  ms.forEach(function(m){
+    var pct=Math.min(100,Math.round(m.v/m.goal*100)),val='';
+    if(m.id==='steps')val=(m.v||0).toLocaleString('pt-BR')+' / '+m.goal.toLocaleString('pt-BR');
+    else if(m.id==='water')val=num(m.v/1000,m.v%1000?2:0)+' / '+num(m.goal/1000,m.goal%1000?2:0)+' L';
+    else if(m.id==='vol')val=m.v+' / '+m.goal;
+    else val=m.done?'Feito':'Pendente';
+    h+='<li class="q'+(m.done?' ok':'')+'"><div class="qrow"><span class="qchk" aria-hidden="true">'+(m.done?'✓':'')+'</span><span class="qt">'+esc(m.t)+'</span><span class="qv mono">'+val+'</span></div>';
+    if(m.goal>1)h+='<div class="qbar" role="progressbar" aria-label="'+esc(m.t)+'" aria-valuemin="0" aria-valuemax="'+m.goal+'" aria-valuenow="'+m.v+'"><i style="width:'+pct+'%"></i></div>';
+    if(m.note)h+='<p class="note qn">'+esc(m.note)+'</p>';
+    if(m.id==='water')h+='<div class="row qact"><button class="btn sm" data-act="water" data-v="250">+ 250 ml</button><button class="btn sm" data-act="water" data-v="500">+ 500 ml</button>'+(m.v?'<button class="btn sm ghost" data-act="water" data-v="-250" aria-label="Desfazer 250 ml">− 250</button>':'')+'</div>';
+    if(m.id==='steps')h+='<div class="row qact"><input id="qsteps" inputmode="numeric" placeholder="Passos de hoje" aria-label="Passos de hoje" value="'+(m.v||'')+'" style="max-width:150px"><button class="btn sm" data-act="steps-save">Salvar passos</button></div><p class="note qn">Por enquanto, copie do app do seu relógio ou celular.</p>';
+    if(m.check)h+='<div class="row qact"><button class="btn sm'+(m.done?' ghost':'')+'" data-act="qcheck">'+(m.done?'Desmarcar':'Marcar como feito')+'</button></div>';
+    if(m.id==='train'&&!m.done)h+='<div class="row qact"><button class="btn sm primary" data-act="start-empty">Iniciar treino</button></div>';
+  });
+  return h+'</ul></section>';
+}
+function trimDaily(){var ks=Object.keys(S.daily||{}).sort();while(ks.length>120)delete S.daily[ks.shift()];}
+
+/* ---------- Primeiro acesso: tela dedicada ---------- */
+var onb=null;
+function needsOnboard(){return !S.settings.goal&&S.settings.onbLater!==today();}
+function showOnboard(){
+  var cur=myAv();
+  onb={step:0,g:cur?cur.g:'m',skin:cur&&cur.skin||'clara',hair:cur&&cur.hair||'',goal:S.settings.goal||'',days:S.settings.days||3,alt:S.settings.altura||'',kg:myMeasures().peso?conv(myMeasures().peso):''};
+  document.body.classList.add('authmode');drawOnboard();
+}
+function onbHair(){return onb.hair||(onb.g==='f'?'Vinho':'Grafite');}
+function drawOnboard(){
+  var el=$('#auth');el.hidden=false;var st=onb.step,h='',N=5;
+  var dots='<div class="onbdots" aria-hidden="true">'+[0,1,2,3,4].map(function(i){return '<i class="'+(i<=st?'on':'')+'"></i>';}).join('')+'</div>';
+  if(st===0){
+    h='<section class="sys onbcard"><p class="eyebrow">Sistema</p><h1>Você foi escolhido como Jogador.</h1><p class="sub">Antes de começar, o Sistema precisa conhecer você: seu personagem, seu objetivo e sua rotina. Leva um minuto.</p>'+(AV?'<div class="avduo onbduo">'+avSVG({g:'m',rank:'E'},'full','Avatar masculino')+avSVG({g:'f',rank:'E'},'full','Avatar feminino')+'</div>':'')+
+      '<button class="btn primary block" data-act="onb-next">Começar</button><div class="alinks"><button class="linkbtn" data-act="onb-later">Fazer depois</button></div></section>';
+  }else if(st===1){
+    var SKN=[['clara','clara'],['media','média'],['morena','morena'],['escura','escura']];
+    h='<section class="sys onbcard"><p class="eyebrow">Passo 1 de 4 · Personagem</p><h1>Monte seu avatar</h1><div class="avpick"><div class="sys prev">'+avSVG({g:onb.g,skin:onb.skin,hair:onbHair(),rank:'E'},'full','Prévia do avatar')+'</div><div>'+
+      '<div class="lbl">Personagem</div><div class="seg" style="margin:7px 0 14px">'+[['m','Masculino'],['f','Feminino']].map(function(x){return '<button data-act="onb-set" data-k="g" data-v="'+x[0]+'" class="'+(onb.g===x[0]?'on':'')+'" aria-pressed="'+(onb.g===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
+      '<div class="lbl">Tom de pele</div><div class="swatches">'+SKN.map(function(x){var on=onb.skin===x[0];return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.SKIN[x[0]][0]+'" data-act="onb-set" data-k="skin" data-v="'+x[0]+'" aria-label="Pele '+x[1]+'" aria-pressed="'+on+'"></button>';}).join('')+'</div>'+
+      '<div class="lbl">Cabelo</div><div class="swatches">'+Object.keys(AV.HAIR).map(function(k){var on=onbHair()===k;return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.HAIR[k][0]+'" data-act="onb-set" data-k="hair" data-v="'+k+'" aria-label="Cabelo '+k+'" aria-pressed="'+on+'" title="'+k+'"></button>';}).join('')+'</div></div></div>'+
+      '<div class="row end"><button class="btn ghost" data-act="onb-back">Voltar</button><button class="btn primary" data-act="onb-next">Continuar</button></div></section>';
+  }else if(st===2){
+    h='<section class="sys onbcard"><p class="eyebrow">Passo 2 de 4 · Objetivo</p><h1>Qual é o seu objetivo?</h1><p class="sub">As missões diárias se ajustam a ele. Dá para mudar depois no Status.</p><div class="goals" role="radiogroup" aria-label="Objetivo">'+
+      GOALS.map(function(x){var on=onb.goal===x[0];return '<button class="goal'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" data-act="onb-set" data-k="goal" data-v="'+x[0]+'"><b>'+x[1]+'</b><small>'+x[2]+'</small></button>';}).join('')+
+      '</div><div class="row end"><button class="btn ghost" data-act="onb-back">Voltar</button><button class="btn primary" data-act="onb-next"'+(onb.goal?'':' disabled')+'>Continuar</button></div></section>';
+  }else if(st===3){
+    h='<section class="sys onbcard"><p class="eyebrow">Passo 3 de 4 · Rotina e corpo</p><h1>Sua rotina</h1><div class="lbl">Quantos dias por semana você quer treinar?</div><div class="seg" style="margin:8px 0 18px">'+[2,3,4,5,6].map(function(n){return '<button data-act="onb-set" data-k="days" data-v="'+n+'" class="'+(onb.days===n?'on':'')+'" aria-pressed="'+(onb.days===n)+'">'+n+'</button>';}).join('')+'</div>'+
+      '<div class="measures" style="grid-template-columns:1fr 1fr"><label class="fl">Altura (cm)<input id="onb-alt" inputmode="decimal" placeholder="175" value="'+(onb.alt?esc(String(onb.alt)):'')+'"></label><label class="fl">Peso ('+unit()+')<input id="onb-kg" inputmode="decimal" placeholder="0,0" value="'+(onb.kg?esc(String(onb.kg)):'')+'"></label></div>'+
+      '<p class="note" style="margin:0 0 16px">Opcional. O peso define a meta de água e, com a altura, o corpo do avatar.</p>'+
+      '<div class="row end"><button class="btn ghost" data-act="onb-back">Voltar</button><button class="btn primary" data-act="onb-next">Continuar</button></div></section>';
+  }else{
+    var ms=missions();
+    h='<section class="sys onbcard"><p class="eyebrow">Passo 4 de 4 · Missões</p><h1>Missões diárias liberadas</h1><div class="onbav">'+avSVG(pubAvatar(),'bust','Seu avatar')+'</div><p class="sub">Objetivo: <b>'+goalName(myGoal())+'</b>. Todo dia o Sistema entrega estas missões:</p><ul class="qlist">'+
+      ms.map(function(m){return '<li class="q"><div class="qrow"><span class="qchk" aria-hidden="true"></span><span class="qt">'+esc(m.t)+'</span></div></li>';}).join('')+
+      '</ul><button class="btn primary block" data-act="onb-done" style="margin-top:16px">Entrar no Sistema</button></section>';
+  }
+  el.innerHTML='<div class="authbox onbbox"><div class="logo">'+LOGO+'</div>'+dots+h+'</div>';
+  var f=el.querySelector('h1');if(f){f.setAttribute('tabindex','-1');try{f.focus();}catch(e){}}
+}
+function onbAct(a,el){
+  if(!onb)return false;
+  if(a==='onb-set'){var k=el.dataset.k,v=el.dataset.v;onb[k]=k==='days'?+v:v;drawOnboard();return true;}
+  if(a==='onb-back'){onb.step=Math.max(0,onb.step-1);drawOnboard();return true;}
+  if(a==='onb-later'){S.settings.onbLater=today();save();onb=null;hideAuth();render();return true;}
+  if(a==='onb-next'){
+    if(onb.step===1){S.settings.avatar=Object.assign({},S.settings.avatar||{},{g:onb.g,skin:onb.skin,hair:onbHair()});if(S.settings.avatar.medidas==null)S.settings.avatar.medidas=true;}
+    if(onb.step===2){if(!onb.goal)return true;S.settings.goal=onb.goal;}
+    if(onb.step===3){
+      var alt=pnum($('#onb-alt').value),kg=toKg($('#onb-kg').value);
+      if(alt!=null&&(isNaN(alt)||alt<100||alt>250)){toast('Altura: confira o valor.');return true;}
+      if($('#onb-kg').value.trim()&&!(kg>=25&&kg<=350)){toast('Peso: confira o valor.');return true;}
+      onb.alt=alt||'';onb.kg=$('#onb-kg').value.trim();
+      S.settings.days=onb.days;if(alt)S.settings.altura=alt;
+      if(kg>0){var d=today(),old=S.body.filter(function(x){return x.d===d;})[0]||{};S.body=S.body.filter(function(x){return x.d!==d;});S.body.push(Object.assign({},old,{d:d,kg:kg}));}
+    }
+    save();syncAvatar();onb.step++;drawOnboard();return true;
+  }
+  if(a==='onb-done'){delete S.settings.onbLater;save();onb=null;hideAuth();try{history.replaceState(null,'',location.pathname+'#inicio');}catch(e){}route();render();toast('Bem-vindo ao Sistema.');return true;}
+  return false;
+}
+function goalEdit(){
+  var sel=myGoal(),days=S.settings.days||3;
+  pushModal({title:'Objetivo',html:function(){return head('Objetivo e rotina')+'<div class="goals" role="radiogroup" aria-label="Objetivo">'+GOALS.map(function(x){var on=sel===x[0];return '<button class="goal'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" data-act="goal-set" data-v="'+x[0]+'"><b>'+x[1]+'</b><small>'+x[2]+'</small></button>';}).join('')+'</div><div class="lbl" style="margin-top:14px">Dias de treino por semana</div><div class="seg" style="margin:8px 0 16px">'+[2,3,4,5,6].map(function(n){return '<button data-act="goal-days" data-v="'+n+'" class="'+(days===n?'on':'')+'" aria-pressed="'+(days===n)+'">'+n+'</button>';}).join('')+'</div><div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="goal-save">Salvar</button></div>';},
+    act:function(a,el){if(a==='goal-set'){sel=el.dataset.v;drawModal();return true;}if(a==='goal-days'){days=+el.dataset.v;drawModal();return true;}if(a==='goal-save'){S.settings.goal=sel;S.settings.days=days;delete S.settings.onbLater;save();popModal();render();toast('Objetivo atualizado.');return true;}return false;}});
 }
 
 /* Aba Pessoas */
@@ -1338,8 +1478,10 @@ function posts(){
 function vInicio(){
   var wk=Date.now()-7*864e5,ws=S.workouts.filter(function(w){return w.start>=wk;}),v=0,n=0;
   ws.forEach(function(w){var s=wkStats(w);v+=s.vol;n+=s.sets;});
-  var today=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
-  var h=ph(today,'Olá, '+(S.settings.name||'Atleta'))+'<div class="wrap">';
+  var hoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  var h=ph(hoje,'Olá, '+(S.settings.name||'Atleta'))+'<div class="wrap">';
+  if(!S.settings.goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px"><div><b>Complete seu cadastro no Sistema</b><p class="note">Escolha avatar e objetivo para receber missões sob medida.</p></div><button class="btn sm primary" data-act="onb-open">Continuar</button></div>';
+  h+=missionsHTML();
   h+='<div class="tiles"><div class="tile"><span class="lbl">Treinos · 7 dias</span><b>'+ws.length+'</b></div><div class="tile"><span class="lbl">Volume · 7 dias</span><b>'+fmtVol(v)+'</b></div><div class="tile"><span class="lbl">Séries · 7 dias</span><b>'+n+'</b></div></div>';
   h+='<div class="card row" style="margin-top:14px;justify-content:space-between">'+(S.active?'<div><b>Treino em andamento</b><p class="note">'+esc(S.active.name)+'</p></div><a class="btn primary" href="#treino">Retomar</a>':'<div><b>Pronto para treinar?</b><p class="note">Comece vazio ou escolha um dos seus treinos.</p></div><span class="row"><button class="btn primary" data-act="start-empty">Iniciar treino vazio</button><a class="btn" href="#treino">Meus treinos</a></span>')+'</div>';
   h+='<section class="sec"><div class="sh"><h2>Feed</h2><a class="btn sm" href="#pessoas">Encontrar pessoas</a></div><div id="feed" class="stack">'+feedHTML()+'</div></section></div>';
@@ -1598,6 +1740,11 @@ var ACT={
    if(n){var old=S.body.filter(function(x){return x.d===d;})[0]||{};S.body=S.body.filter(function(x){return x.d!==d;});S.body.push(Object.assign({},old,rec));}
    save();syncAvatar();render();toast('Medidas registradas.');},
  'av-edit':function(){avEdit();},
+ 'onb-open':function(){showOnboard();},
+ 'goal-edit':function(){goalEdit();},
+ 'water':function(el){var r=dayRec(today());r.w=Math.max(0,(r.w||0)+(+el.dataset.v));trimDaily();save();render();},
+ 'steps-save':function(){var v=parseInt(String($('#qsteps').value).replace(/\D/g,''),10);if(isNaN(v)||v<0||v>100000){toast('Passos: confira o valor.');return;}dayRec(today()).st=v;trimDaily();save();render();toast('Passos salvos.');},
+ 'qcheck':function(){var r=dayRec(today());r.cx=r.cx?0:1;trimDaily();save();render();},
  'body-del':function(el){S.body=S.body.filter(function(x){return x.d!==el.dataset.v;});save();syncAvatar();render();},
  'wipe':function(){confirmM('Apagar todos os meus dados','Treinos, histórico, rotinas, exercícios criados e registros de peso serão apagados da sua conta. Não dá para desfazer.','Apagar tudo',function(){var st=S.settings;S=blank();S.settings=st;S.pendingWipe=true;rest=null;save();flushPosts();render();toast('Dados apagados.');},true);},
  'copy-data':function(){
@@ -1619,6 +1766,7 @@ document.addEventListener('click',function(e){
     if(a==='modal-close'){popModal();return;}
     var m=stack[stack.length-1];if(m&&m.act&&m.act(a,el,e)===true)return;
   }
+  if(onb&&el.closest('#auth')&&onbAct(a,el))return;
   if(ACT[a])ACT[a](el,e);
 });
 function onInput(t){
