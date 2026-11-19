@@ -400,6 +400,11 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .dsum b{font-size:18px}
 .mbar .xpbar{margin-top:6px}
 .fbig{font:700 36px/1.1 var(--mono);color:var(--accent)}
+.ditemw{display:flex;align-items:center;border-top:1px solid var(--line)}
+.ditemw:first-child{border-top:0}
+.ditemw .ditem{border-top:0;flex:1;min-width:0}
+.ditemw .x{flex:none;margin-left:6px}
+#scanv{width:100%;max-height:50vh;border-radius:8px;background:#000;object-fit:cover;display:block}
 .ditem{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--line);padding:10px 0;min-height:52px;color:inherit}
 .ditem:first-child{border-top:0}
 .ditem .dname{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -431,6 +436,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 <script src="/exart.js"></script>
 <script src="/demos.js"></script>
 <script src="/avatar.js"></script>
+<script src="/taco.js"></script>
 <script src="/dieta.js"></script>
 <script>
 (function(){
@@ -2021,7 +2027,7 @@ function vDieta(){
   var d=dDay(),r=nRead(d),g=nGoal(),T=DT.sum(r.items),mg=DT.macroGrams(g.kcal,g.c,g.f,g.p),ex=r.ex||0,left=g.kcal-T.k+ex;
   h+='<div class="row dnav" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:14px"><button class="btn sm" data-act="d-prev" aria-label="Dia anterior">‹</button><button class="btn ghost sm" data-act="d-today" aria-label="Voltar para hoje"><b>'+esc(dLabel(d))+'</b></button><button class="btn sm" data-act="d-next" aria-label="Próximo dia"'+(d>=today()?' disabled style="opacity:.4"':'')+'>›</button></div>';
   if(!nut().goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px"><div><b>Defina suas metas</b><p class="note">Calorias e macros do dia. Até lá usamos 2000 kcal (50% carboidratos, 30% gorduras, 20% proteínas).</p></div><button class="btn sm primary" data-act="d-goals">Definir metas</button></div>';
-  h+='<section class="sys" aria-label="Resumo do dia" style="padding:16px"><div class="row" style="flex-wrap:nowrap;gap:16px;align-items:center">'+dRing(T.k,g.kcal+ex,left)+'<div class="stack" style="gap:8px;flex:1;min-width:0"><div class="dsum"><span>Meta</span><b class="mono">'+num(g.kcal,0)+'</b></div><div class="dsum"><span>Alimentos</span><b class="mono">'+num(T.k,0)+'</b></div><div class="dsum"><span>Exercícios</span><b class="mono">'+num(ex,0)+'</b></div></div></div><p class="note" style="margin:10px 0 12px">Restantes = Meta − Alimentos + Exercícios</p><div class="stack" style="gap:10px">'+dBar('Carboidratos',T.c,mg.c,'var(--accent)')+dBar('Gorduras',T.f,mg.f,'#a78bfa')+dBar('Proteínas',T.p,mg.p,'var(--good)')+'</div><div class="row" style="margin-top:14px"><button class="btn sm" data-act="d-goals">Metas</button><button class="btn sm" data-act="d-ex">Exercícios (kcal)</button>'+(!r.items.length&&nRead(dkOff(d,-1)).items.length?'<button class="btn sm" data-act="d-copy">Copiar de ontem</button>':'')+'</div></section>';
+  h+='<section class="sys" aria-label="Resumo do dia" style="padding:16px"><div class="row" style="flex-wrap:nowrap;gap:16px;align-items:center">'+dRing(T.k,g.kcal+ex,left)+'<div class="stack" style="gap:8px;flex:1;min-width:0"><div class="dsum"><span>Meta</span><b class="mono">'+num(g.kcal,0)+'</b></div><div class="dsum"><span>Alimentos</span><b class="mono">'+num(T.k,0)+'</b></div><div class="dsum"><span>Exercícios</span><b class="mono">'+num(ex,0)+'</b></div></div></div><p class="note" style="margin:10px 0 12px">Restantes = Meta − Alimentos + Exercícios</p><div class="stack" style="gap:10px">'+dBar('Carboidratos',T.c,mg.c,'var(--accent)')+dBar('Gorduras',T.f,mg.f,'#a78bfa')+dBar('Proteínas',T.p,mg.p,'var(--good)')+'</div>'+dMicro(T,g)+'<div class="row" style="margin-top:14px"><button class="btn sm" data-act="d-goals">Metas</button><button class="btn sm" data-act="d-ex">Exercícios (kcal)</button>'+(!r.items.length&&nRead(dkOff(d,-1)).items.length?'<button class="btn sm" data-act="d-copy">Copiar de ontem</button>':'')+'</div></section>';
   DT.MEALS.forEach(function(name,i){
     var its=r.items.filter(function(x){return x.m===i;}),t=DT.sum(its),goal=Math.round(g.kcal*((g.meals||DT.MEAL_PCT)[i]||0)/100);
     h+='<section class="sec" aria-label="'+esc(name)+'"><div class="sh"><h2 style="font-size:19px">'+esc(name)+'</h2><span class="mono note">'+num(t.k,0)+' / '+num(goal,0)+' kcal</span></div><div class="card" style="padding:4px 16px">'+its.map(function(x){return '<button class="ditem" data-act="d-item" data-id="'+esc(x.id)+'"><span style="min-width:0"><b class="dname">'+esc(x.n)+'</b><small>'+gFmt(x.g)+' g · P '+gFmt(x.p)+' · C '+gFmt(x.c)+' · G '+gFmt(x.f)+'</small></span><b class="mono">'+num(x.k,0)+'</b></button>';}).join('')+'<button class="btn ghost block" style="margin:10px 0" data-act="d-add" data-m="'+i+'">+ Adicionar alimento</button></div></section>';
@@ -2032,11 +2038,11 @@ function vDieta(){
 }
 
 /* ---- Quantidade (adicionar ou editar um item do diário) ---- */
-function foodQty(food,meal,editId,gram){
+function foodQty(food,meal,editId,gram,cb){
   var d=dDay(),g=gram>0?gram:(food.g>0?food.g:100),mi=meal;
   function prev(){var v=DT.scale(food.b,g>0?g:0);return '<div class="tiles" style="margin:12px 0"><div class="tile"><span class="lbl">kcal</span><b>'+num(v.k,0)+'</b></div><div class="tile"><span class="lbl">Prot.</span><b>'+gFmt(v.p)+'</b></div><div class="tile"><span class="lbl">Carb.</span><b>'+gFmt(v.c)+'</b></div><div class="tile"><span class="lbl">Gord.</span><b>'+gFmt(v.f)+'</b></div></div>';}
   pushModal({title:editId?'Editar alimento':'Quantidade',
-    html:function(){return head(food.name)+'<label class="lbl" for="qg">Quantidade (g)</label><input id="qg" inputmode="decimal" value="'+esc(String(g))+'" aria-label="Quantidade em gramas"><div class="chips" style="margin-top:8px">'+[50,100,150,200,300].map(function(n){return '<button class="chip'+(g===n?' on':'')+'" data-act="q-g" data-v="'+n+'">'+n+' g</button>';}).join('')+'</div><div id="qprev">'+prev()+'</div><div class="lbl">Refeição</div><div class="scroll-x" style="margin:8px 0 4px"><div class="seg">'+DT.MEALS.map(function(n,i){return '<button class="'+(mi===i?'on':'')+'" data-act="q-m" data-v="'+i+'">'+esc(n)+'</button>';}).join('')+'</div></div><p class="note">Valores por 100 g: '+num(food.b.k,0)+' kcal · P '+gFmt(food.b.p)+' · C '+gFmt(food.b.c)+' · G '+gFmt(food.b.f)+'</p><div class="row end">'+(editId?'<button class="btn danger" data-act="q-del">Excluir</button>':'<button class="btn ghost" data-act="modal-close">Cancelar</button>')+'<button class="btn primary" data-act="q-ok">'+(editId?'Salvar':'Adicionar')+'</button></div>';},
+    html:function(){return head(food.name)+'<label class="lbl" for="qg">Quantidade (g)</label><input id="qg" inputmode="decimal" value="'+esc(String(g))+'" aria-label="Quantidade em gramas"><div class="chips" style="margin-top:8px">'+[50,100,150,200,300].map(function(n){return '<button class="chip'+(g===n?' on':'')+'" data-act="q-g" data-v="'+n+'">'+n+' g</button>';}).join('')+'</div><div id="qprev">'+prev()+'</div>'+(cb?'':'<div class="lbl">Refeição</div><div class="scroll-x" style="margin:8px 0 4px"><div class="seg">'+DT.MEALS.map(function(n,i){return '<button class="'+(mi===i?'on':'')+'" data-act="q-m" data-v="'+i+'">'+esc(n)+'</button>';}).join('')+'</div></div>')+'<p class="note">Valores por 100 g: '+per100(food.b)+'</p><div class="row end">'+(editId?'<button class="btn danger" data-act="q-del">Excluir</button>':'<button class="btn ghost" data-act="modal-close">Cancelar</button>')+'<button class="btn primary" data-act="q-ok">'+(editId?'Salvar':'Adicionar')+'</button></div>';},
     input:function(t){if(t.id==='qg'){var v=pnum(t.value);g=v>0?v:0;var p=$('#qprev');if(p)p.innerHTML=prev();document.querySelectorAll('.chips [data-act="q-g"]').forEach(function(b){b.classList.toggle('on',+b.dataset.v===g);});}},
     act:function(a,el){
       if(a==='q-g'){g=+el.dataset.v;drawModal();return true;}
@@ -2044,10 +2050,11 @@ function foodQty(food,meal,editId,gram){
       if(a==='q-del'){var day=nDay(d);day.items=day.items.filter(function(x){return x.id!==editId;});save();stack=[];drawModal();render();toast('Alimento removido.');return true;}
       if(a==='q-ok'){
         if(!(g>0&&g<=5000)){toast('Informe uma quantidade entre 1 e 5000 g.');return true;}
+        if(cb){stack.pop();cb(food,g);drawModal();return true;}
         var v=DT.scale(food.b,g),day2=nDay(d);
-        if(editId){day2.items.forEach(function(x){if(x.id===editId){x.g=g;x.m=mi;x.k=v.k;x.p=v.p;x.c=v.c;x.f=v.f;}});}
+        if(editId){day2.items.forEach(function(x){if(x.id===editId){x.g=g;x.m=mi;['k','p','c','f','fi','su','na'].forEach(function(key){if(v[key]!=null)x[key]=v[key];else delete x[key];});}});}
         else{
-          day2.items.push({id:uid(),m:mi,n:food.name,g:g,k:v.k,p:v.p,c:v.c,f:v.f,b:food.b});
+          day2.items.push(Object.assign({id:uid(),m:mi,n:food.name,g:g,b:food.b},v));
           var n=nut();n.recent=[{id:food.id||uid(),name:food.name,src:food.src||'mine',g:g,b:food.b}].concat(n.recent.filter(function(x){return x.name!==food.name;})).slice(0,15);
         }
         trimNut();save();stack=[];drawModal();render();toast(editId?'Alimento atualizado.':'Adicionado ao diário.');return true;
@@ -2057,7 +2064,7 @@ function foodQty(food,meal,editId,gram){
 }
 
 /* ---- Buscar alimento ---- */
-function foodPicker(meal){
+function foodPicker(meal,cb){
   var q='',tab='busca',off=[],offState='idle',ctl=null,gen=0,timer=null,cur=[];
   function list(){
     var n=nut();
@@ -2071,7 +2078,11 @@ function foodPicker(meal){
     cur=loc.concat(off);
     return '';
   }
-  function row(f,i){return '<button class="ditem" data-act="f-pick" data-i="'+i+'"><span style="min-width:0"><b class="dname">'+esc(f.name)+'</b><small>'+(f.src==='off'?'Produto · ':f.src==='mine'?'Meu alimento · ':'')+'por 100 g · P '+gFmt(f.b.p)+' · C '+gFmt(f.b.c)+' · G '+gFmt(f.b.f)+'</small></span><b class="mono">'+num(f.b.k,0)+'</b></button>';}
+  function row(f,i){
+    var own=f.src==='mine'||f.src==='recipe',lab=f.src==='off'?'Produto · ':f.src==='mine'?'Meu alimento · ':f.src==='recipe'?'Receita · ':'';
+    var main='<button class="ditem" data-act="f-pick" data-i="'+i+'"><span style="min-width:0"><b class="dname">'+esc(f.name)+'</b><small>'+lab+'por 100 g · P '+gFmt(f.b.p)+' · C '+gFmt(f.b.c)+' · G '+gFmt(f.b.f)+'</small></span><b class="mono">'+num(f.b.k,0)+'</b></button>';
+    return own?'<div class="ditemw">'+main+'<button class="x" data-act="f-del" data-i="'+i+'" aria-label="Excluir '+esc(f.name)+'">×</button></div>':main;
+  }
   function refresh(){
     var el=$('#fl');if(!el)return;
     var empty=list(),h=empty||cur.map(row).join('');
@@ -2099,33 +2110,39 @@ function foodPicker(meal){
     },450);
   }
   pushModal({title:'Adicionar alimento',
-    html:function(){return head('Adicionar alimento')+'<div class="seg" style="margin-bottom:10px">'+[['busca','Buscar'],['meus','Meus alimentos']].map(function(x){return '<button class="'+(tab===x[0]?'on':'')+'" data-act="f-tab" data-v="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><input type="search" id="fq" placeholder="Nome do alimento ou código de barras…" aria-label="Buscar alimento" value="'+esc(q)+'" autocomplete="off"><div id="fl" style="margin-top:8px;max-height:46vh;overflow:auto"></div><button class="btn ghost block" style="margin-top:10px" data-act="f-new">+ Criar alimento</button>';},
+    html:function(){return head('Adicionar alimento')+'<div class="seg" style="margin-bottom:10px">'+[['busca','Buscar'],['meus','Meus alimentos']].map(function(x){return '<button class="'+(tab===x[0]?'on':'')+'" data-act="f-tab" data-v="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div class="row" style="flex-wrap:nowrap"><input type="search" id="fq" placeholder="Nome do alimento ou código de barras…" aria-label="Buscar alimento" value="'+esc(q)+'" autocomplete="off"><button class="btn sm" data-act="f-scan" aria-label="Ler código de barras com a câmera">Escanear</button></div><div id="fl" style="margin-top:8px;max-height:46vh;overflow:auto"></div><div class="row" style="margin-top:10px;flex-wrap:nowrap"><button class="btn ghost" style="flex:1" data-act="f-new">+ Criar alimento</button>'+(cb?'':'<button class="btn ghost" style="flex:1" data-act="f-rec">+ Criar receita</button>')+'</div>';},
     mount:refresh,
     input:function(t){if(t.id==='fq'&&t.value!==q){q=t.value;schedule();}},
     act:function(a,el){
       if(a==='f-tab'){tab=el.dataset.v;gen++;if(ctl){ctl.abort();ctl=null;}off=[];offState='idle';drawModal();if(tab==='busca'&&q.trim().length>=2)schedule();return true;}
-      if(a==='f-pick'){var f=cur[+el.dataset.i];if(f){gen++;if(ctl)ctl.abort();clearTimeout(timer);stack.pop();foodQty(f,meal);}return true;}
-      if(a==='f-new'){gen++;if(ctl)ctl.abort();clearTimeout(timer);stack.pop();foodNew(meal,q.trim());return true;}
+      if(a==='f-pick'){var f=cur[+el.dataset.i];if(f){gen++;if(ctl)ctl.abort();clearTimeout(timer);stack.pop();foodQty(f,meal,null,null,cb);}return true;}
+      if(a==='f-new'){gen++;if(ctl)ctl.abort();clearTimeout(timer);stack.pop();foodNew(meal,q.trim(),cb);return true;}
+      if(a==='f-scan'){gen++;if(ctl)ctl.abort();clearTimeout(timer);stack.pop();scanBarcode(meal,cb);return true;}
+      if(a==='f-rec'){gen++;if(ctl)ctl.abort();clearTimeout(timer);stack.pop();recipeEdit(meal);return true;}
+      if(a==='f-del'){var fd=cur[+el.dataset.i];if(!fd)return true;confirmM('Excluir '+(fd.src==='recipe'?'receita':'alimento'),'"'+fd.name+'" será removido da sua lista. O que você já registrou no diário não muda.','Excluir',function(){var nn=nut();nn.mine=nn.mine.filter(function(x){return x.id!==fd.id;});nn.recent=nn.recent.filter(function(x){return !(x.name===fd.name&&(x.src==='mine'||x.src==='recipe'));});save();drawModal();toast('Removido.');},true);return true;}
       return false;
     }});
 }
 
 /* ---- Criar alimento próprio (valores por 100 g) ---- */
-function foodNew(meal,name0){
-  var v={n:name0&&!/^\d+$/.test(name0)?name0:'',k:'',p:'',c:'',f:''};
+function foodNew(meal,name0,cb){
+  var v={n:name0&&!/^\d+$/.test(name0)?name0:'',k:'',p:'',c:'',f:'',fi:'',su:'',na:''};
   pushModal({title:'Criar alimento',
     html:function(){
       function fld(id,l,val,u){return '<div><label class="lbl" for="'+id+'">'+l+'</label><input id="'+id+'" inputmode="decimal" value="'+esc(val)+'" aria-label="'+l+' '+u+'"></div>';}
-      return head('Criar alimento')+'<label class="lbl" for="fn">Nome</label><input id="fn" maxlength="60" value="'+esc(v.n)+'" aria-label="Nome do alimento" autocomplete="off"><p class="note" style="margin:12px 0 8px">Informe os valores para 100 g (ou 100 ml).</p><div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">'+fld('fk','Calorias (kcal)',v.k,'kcal')+fld('fp','Proteínas (g)',v.p,'g')+fld('fc','Carboidratos (g)',v.c,'g')+fld('ff','Gorduras (g)',v.f,'g')+'</div><div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="n-ok">Continuar</button></div>';},
-    input:function(t){var m={fn:'n',fk:'k',fp:'p',fc:'c',ff:'f'}[t.id];if(m)v[m]=t.value;},
+      return head('Criar alimento')+'<label class="lbl" for="fn">Nome</label><input id="fn" maxlength="60" value="'+esc(v.n)+'" aria-label="Nome do alimento" autocomplete="off"><p class="note" style="margin:12px 0 8px">Informe os valores para 100 g (ou 100 ml).</p><div class="grid2" style="grid-template-columns:1fr 1fr;gap:10px">'+fld('fk','Calorias (kcal)',v.k,'kcal')+fld('fp','Proteínas (g)',v.p,'g')+fld('fc','Carboidratos (g)',v.c,'g')+fld('ff','Gorduras (g)',v.f,'g')+'</div><p class="note" style="margin:12px 0 8px">Opcional:</p><div class="grid2" style="grid-template-columns:1fr 1fr 1fr;gap:10px">'+fld('ffb','Fibras (g)',v.fi,'g')+fld('fsu','Açúcares (g)',v.su,'g')+fld('fna','Sódio (mg)',v.na,'mg')+'</div><div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="n-ok">Continuar</button></div>';},
+    input:function(t){var m={fn:'n',fk:'k',fp:'p',fc:'c',ff:'f',ffb:'fi',fsu:'su',fna:'na'}[t.id];if(m)v[m]=t.value;},
     act:function(a){
       if(a!=='n-ok')return false;
       var name=v.n.trim(),k=pnum(v.k),p=pnum(v.p)||0,c=pnum(v.c)||0,f=pnum(v.f)||0;
       if(!name){toast('Dê um nome ao alimento.');return true;}
       if(k==null||isNaN(k)||k<0||k>950){toast('Calorias por 100 g: informe de 0 a 950.');return true;}
       if([p,c,f].some(function(x){return isNaN(x)||x<0||x>100;})){toast('Macros por 100 g: de 0 a 100 g.');return true;}
+      var fi=pnum(v.fi),su=pnum(v.su),na=pnum(v.na);
+      if((fi!=null&&(isNaN(fi)||fi<0||fi>100))||(su!=null&&(isNaN(su)||su<0||su>100))||(na!=null&&(isNaN(na)||na<0||na>40000))){toast('Confira fibras, açúcares (0 a 100 g) e sódio (0 a 40000 mg).');return true;}
       var food={id:uid(),name:name.slice(0,60),src:'mine',g:100,b:{k:Math.round(k),p:p,c:c,f:f}};
-      nut().mine.push(food);save();stack.pop();foodQty(food,meal);return true;
+      if(fi!=null)food.b.fi=fi;if(su!=null)food.b.su=su;if(na!=null)food.b.na=Math.round(na);
+      nut().mine.push(food);save();stack.pop();foodQty(food,meal,null,null,cb);return true;
     }});
 }
 
@@ -2248,6 +2265,87 @@ Object.assign(ACT,{
    if(el<f.h*3600000)confirmM('Encerrar jejum','Você está há '+fmtDur(el/1000)+' de '+f.h+' h. Encerrar agora?','Encerrar',finish,true);else finish();
  }
 });
+
+/* ---- Fase 3: nutrientes, receitas e câmera ---- */
+function per100(b){return num(b.k,0)+' kcal · P '+gFmt(b.p)+' · C '+gFmt(b.c)+' · G '+gFmt(b.f)+(b.fi!=null?' · Fibra '+gFmt(b.fi):'')+(b.na!=null?' · Sódio '+num(b.na,0)+' mg':'');}
+function dMicro(T,g){
+  var mg=DT.microGoals(g.kcal);
+  function bar(lbl,v,goal,unit,lim){
+    var pct=goal>0?Math.min(100,Math.round(v/goal*100)):0,over=lim&&v>goal;
+    return '<div class="mbar"><div class="row" style="justify-content:space-between;gap:8px;flex-wrap:nowrap"><span class="lbl">'+lbl+'</span><span class="mono note"'+(over?' style="color:var(--bad)"':'')+'>'+gFmt(v)+' / '+gFmt(goal)+' '+unit+'</span></div><div class="xpbar" role="progressbar" aria-label="'+lbl+'" aria-valuemin="0" aria-valuemax="'+goal+'" aria-valuenow="'+Math.round(v)+'"><i style="width:'+pct+'%;background:'+(over?'var(--bad)':'#7fd3ff')+';box-shadow:none"></i></div></div>';
+  }
+  return '<details class="howto" style="margin-top:14px"><summary>Fibras, açúcares e sódio</summary><div class="stack" style="gap:10px;margin-top:10px">'+bar('Fibras (meta)',T.fi,mg.fi,'g',false)+bar('Açúcares (limite)',T.su,mg.su,'g',true)+bar('Sódio (limite)',T.na,mg.na,'mg',true)+'</div><p class="note" style="margin-top:8px">Contam só os alimentos que informam esses valores. Referências gerais da OMS; não substituem orientação de nutricionista.</p></details>';
+}
+
+function recipeEdit(meal){
+  var R={n:'',s:'1',ings:[]};
+  function calc(){return DT.recipe(R.ings,pnum(R.s));}
+  function tot(){
+    var c=calc();if(!c)return '<p class="note" style="margin-top:10px">Adicione ingredientes e informe quantas porções a receita rende.</p>';
+    var v=c.perServ;
+    return '<div class="tiles" style="margin:12px 0 6px"><div class="tile"><span class="lbl">kcal</span><b>'+num(v.k,0)+'</b></div><div class="tile"><span class="lbl">Prot.</span><b>'+gFmt(v.p)+'</b></div><div class="tile"><span class="lbl">Carb.</span><b>'+gFmt(v.c)+'</b></div><div class="tile"><span class="lbl">Gord.</span><b>'+gFmt(v.f)+'</b></div></div><p class="note">Por porção ('+c.g+' g). Receita pronta: '+c.totalG+' g, '+num(c.total.k,0)+' kcal.</p>';
+  }
+  pushModal({title:'Criar receita',
+    html:function(){
+      return head('Criar receita')+'<label class="lbl" for="rn">Nome da receita</label><input id="rn" maxlength="60" value="'+esc(R.n)+'" aria-label="Nome da receita" autocomplete="off"><label class="lbl" for="rs" style="display:block;margin-top:10px">Porções que a receita rende</label><input id="rs" inputmode="numeric" value="'+esc(R.s)+'" aria-label="Porções que a receita rende"><div class="lbl" style="margin:14px 0 4px">Ingredientes (peso cru ou como for usado)</div>'+
+      (R.ings.length?R.ings.map(function(x,i){return '<div class="ditemw"><div class="ditem" style="cursor:default"><span style="min-width:0"><b class="dname">'+esc(x.n)+'</b><small>'+gFmt(x.g)+' g</small></span><b class="mono">'+num(DT.scale(x.b,x.g).k,0)+'</b></div><button class="x" data-act="r-rm" data-i="'+i+'" aria-label="Remover '+esc(x.n)+'">×</button></div>';}).join(''):'<p class="note">Nenhum ingrediente ainda.</p>')+
+      '<button class="btn ghost block" style="margin-top:8px" data-act="r-add">+ Adicionar ingrediente</button><div id="rtot">'+tot()+'</div><div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="r-ok">Salvar e adicionar</button></div>';},
+    input:function(t){if(t.id==='rn')R.n=t.value;else if(t.id==='rs'){R.s=t.value;var e=$('#rtot');if(e)e.innerHTML=tot();}},
+    act:function(a,el){
+      if(a==='r-add'){foodPicker(meal,function(food,g){R.ings.push({n:food.name,g:g,b:food.b});});return true;}
+      if(a==='r-rm'){R.ings.splice(+el.dataset.i,1);drawModal();return true;}
+      if(a==='r-ok'){
+        var name=R.n.trim(),c=calc();
+        if(!name){toast('Dê um nome à receita.');return true;}
+        if(!R.ings.length){toast('Adicione pelo menos um ingrediente.');return true;}
+        if(!c){toast('Porções: informe um número de 1 a 100.');return true;}
+        var food={id:uid(),name:name.slice(0,60),src:'recipe',g:c.g,b:c.b,serv:pnum(R.s),ing:R.ings.map(function(x){return {n:x.n,g:x.g,b:x.b};})};
+        nut().mine.push(food);save();stack.pop();foodQty(food,meal);return true;
+      }
+      return false;
+    }});
+}
+
+function scanBarcode(meal,cb){
+  var stream=null,timer=null,watch=null,busy=false,done=false,
+      ok=!!(window.BarcodeDetector&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+  function stop(){clearTimeout(timer);timer=null;if(stream){stream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});stream=null;}}
+  function msg(t){var e=$('#scanmsg');if(e)e.textContent=t;}
+  function found(code){
+    done=true;stop();msg('Procurando o produto…');
+    DT.searchOFF(code).then(function(r){
+      if(!$('#scanmsg'))return;
+      var f=r[0];
+      if(f){stack.pop();foodQty(f,meal,null,null,cb);return;}
+      msg('Produto '+code+' não encontrado no Open Food Facts. Tente outro ou crie o alimento.');
+      timer=setTimeout(function(){done=false;if($('#scanv'))start();},2500);
+    }).catch(function(){
+      msg('Sem conexão para buscar o produto. Tentando de novo…');
+      timer=setTimeout(function(){if($('#scanmsg'))found(code);},3000);
+    });
+  }
+  function loop(det,v){
+    if(!$('#scanv')||done){stop();return;}
+    var next=function(ms){timer=setTimeout(function(){loop(det,v);},ms);};
+    if(busy||v.readyState<2){next(250);return;}
+    busy=true;
+    det.detect(v).then(function(res){busy=false;var c=res&&res[0]&&res[0].rawValue;if(c&&/^\d{8,14}$/.test(c))found(c);else next(250);}).catch(function(){busy=false;next(400);});
+  }
+  function start(){
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(s){
+      var v=$('#scanv');
+      if(!v||done){s.getTracks().forEach(function(t){try{t.stop();}catch(e){}});return;}
+      stream=s;v.srcObject=s;v.muted=true;v.setAttribute('playsinline','');
+      var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){});
+      var det;try{det=new window.BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});}catch(e){det=new window.BarcodeDetector();}
+      msg('Aponte a câmera para o código de barras.');loop(det,v);
+    }).catch(function(e){msg(e&&e.name==='NotAllowedError'?'Permissão da câmera negada. Libere a câmera no navegador ou digite o número do código.':'Não foi possível abrir a câmera. Digite o número do código na busca.');});
+  }
+  pushModal({title:'Ler código de barras',
+    html:function(){return head('Ler código de barras')+(ok?'<video id="scanv" autoplay playsinline muted></video><p class="note" id="scanmsg" style="margin-top:8px" aria-live="polite">Abrindo a câmera…</p>':'<p class="note" id="scanmsg">Este navegador não lê código de barras pela câmera. Digite o número do código na busca de alimentos.</p>')+'<div class="row end"><button class="btn ghost" data-act="s-back">Digitar o código</button></div>';},
+    mount:function(){stop();done=false;clearInterval(watch);watch=setInterval(function(){if(!$('#scanv')&&!$('#scanmsg')){clearInterval(watch);watch=null;done=true;stop();}},300);if(ok)start();},
+    act:function(a){if(a==='s-back'){done=true;stop();clearInterval(watch);watch=null;stack.pop();foodPicker(meal,cb);return true;}return false;}});
+}
 
 Object.assign(ACT,{
  'd-prev':function(){ui.dd=dkOff(dDay(),-1);render();},

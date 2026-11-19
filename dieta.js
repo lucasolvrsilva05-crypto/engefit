@@ -1,64 +1,44 @@
 /* ENGEFIT · Dieta: dados e cálculos (sem tela).
-   Alimentos básicos: valores aproximados por 100 g, na linha da tabela TACO (Unicamp). Confira a embalagem quando precisar de precisão.
-   Busca de produtos: Open Food Facts (dados abertos, licença ODbL), consultada pela internet. */
+   Alimentos básicos: TACO (NEPA/UNICAMP, 4ª ed., 2011), carregada de taco.js.
+   Produtos: Open Food Facts (dados abertos, licença ODbL), consultado pela internet. */
 (function(){
 'use strict';
 
 var MEALS=['Café da manhã','Almoço','Jantar','Lanches'];
 var MEAL_PCT=[25,35,30,10];
 
-/* [nome, kcal, proteína g, carboidrato g, gordura g] por 100 g */
-var RAW=[
-['Arroz branco cozido',128,2.5,28.1,0.2],
-['Arroz integral cozido',124,2.6,25.8,1.0],
-['Feijão carioca cozido',76,4.8,13.6,0.5],
-['Feijão preto cozido',77,4.5,14.0,0.5],
-['Peito de frango grelhado',159,32.0,0,2.5],
-['Peito de frango cozido',163,31.5,0,3.2],
-['Patinho bovino grelhado',219,35.9,0,7.3],
-['Ovo de galinha cozido',146,13.3,0.6,9.5],
-['Batata-doce cozida',77,0.6,18.4,0.1],
-['Batata inglesa cozida',52,1.2,11.9,0],
-['Mandioca cozida',125,0.6,30.1,0.3],
-['Macarrão cozido',102,3.4,19.9,0.5],
-['Pão francês',300,8.0,58.6,3.1],
-['Pão de forma integral',253,9.4,49.9,3.7],
-['Farinha de mandioca',361,1.6,87.9,0.3],
-['Aveia em flocos',394,13.9,66.6,8.5],
-['Banana prata',98,1.3,26.0,0.1],
-['Maçã',56,0.3,15.2,0],
-['Laranja pera',37,1.0,8.9,0.1],
-['Mamão papaia',40,0.5,10.4,0.1],
-['Abacate',96,1.2,6.0,8.4],
-['Leite integral',61,2.9,4.6,3.5],
-['Iogurte natural',51,4.1,1.9,3.0],
-['Queijo mussarela',330,22.6,3.0,25.2],
-['Queijo minas frescal',264,17.4,3.2,20.2],
-['Azeite de oliva',884,0,0,100],
-['Alface',11,1.4,1.7,0.2],
-['Tomate',15,1.1,3.1,0.2],
-['Cenoura cozida',30,0.8,6.7,0.2],
-['Brócolis cozido',25,2.1,4.4,0.5],
-['Amendoim torrado',606,27.2,12.5,54.0],
-['Castanha-do-pará',643,14.5,15.1,63.5],
-['Açúcar refinado',387,0,99.5,0]
-];
-var FOODS=RAW.map(function(r,i){return {id:'t'+i,name:r[0],src:'taco',g:100,b:{k:r[1],p:r[2],c:r[3],f:r[4]}};});
+/* Base TACO: [nome, kcal, prot, carb, gord, fibra|null, sódio mg|null] por 100 g */
+var RAW=Array.isArray(window.ENGEFIT_TACO)?window.ENGEFIT_TACO:[];
+var FOODS=RAW.map(function(r,i){
+  var b={k:r[1],p:r[2],c:r[3],f:r[4]};
+  if(r[5]!=null)b.fi=r[5];
+  if(r[6]!=null)b.na=r[6];
+  return {id:'t'+i,name:r[0],src:'taco',g:100,b:b};
+});
 
 function norm(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
 function r1(n){return Math.round(n*10)/10;}
 
-/* Valores de uma porção de g gramas a partir da base por 100 g. */
-function scale(b,g){var k=g/100;return {k:Math.round(b.k*k),p:r1(b.p*k),c:r1(b.c*k),f:r1(b.f*k)};}
+/* Valores de uma porção de g gramas a partir da base por 100 g. fi, su (g) e na (mg) só existem se a base informar. */
+function scale(b,g){
+  var k=g/100,o={k:Math.round(b.k*k),p:r1(b.p*k),c:r1(b.c*k),f:r1(b.f*k)};
+  if(b.fi!=null)o.fi=r1(b.fi*k);
+  if(b.su!=null)o.su=r1(b.su*k);
+  if(b.na!=null)o.na=Math.round(b.na*k);
+  return o;
+}
 
 function sum(items){
-  var t={k:0,p:0,c:0,f:0};
-  (items||[]).forEach(function(i){t.k+=i.k||0;t.p+=i.p||0;t.c+=i.c||0;t.f+=i.f||0;});
-  t.k=Math.round(t.k);t.p=r1(t.p);t.c=r1(t.c);t.f=r1(t.f);return t;
+  var t={k:0,p:0,c:0,f:0,fi:0,su:0,na:0};
+  (items||[]).forEach(function(i){t.k+=i.k||0;t.p+=i.p||0;t.c+=i.c||0;t.f+=i.f||0;t.fi+=i.fi||0;t.su+=i.su||0;t.na+=i.na||0;});
+  t.k=Math.round(t.k);t.p=r1(t.p);t.c=r1(t.c);t.f=r1(t.f);t.fi=r1(t.fi);t.su=r1(t.su);t.na=Math.round(t.na);return t;
 }
 
 /* Metas em gramas a partir de kcal e porcentagens (carboidrato e proteína 4 kcal/g, gordura 9 kcal/g). */
 function macroGrams(kcal,pc,pf,pp){return {c:Math.round(kcal*pc/100/4),f:Math.round(kcal*pf/100/9),p:Math.round(kcal*pp/100/4)};}
+
+/* Referências gerais (OMS): fibra 14 g por 1000 kcal (mínimo 25 g), açúcares livres até 10% das calorias, sódio até 2000 mg. */
+function microGoals(kcal){return {fi:Math.max(25,Math.round(kcal/1000*14)),su:Math.round(kcal*0.10/4),na:2000};}
 
 function defaultGoal(){return {kcal:2000,c:50,f:30,p:20,meals:MEAL_PCT.slice()};}
 
@@ -77,12 +57,34 @@ function suggest(o){
   return {kcal:kcal,c:pc,f:pf,p:pp,bmr:Math.round(bmr),tdee:Math.round(tdee)};
 }
 
+/* Busca local: todas as palavras precisam aparecer; quem começa pela primeira palavra vem antes. */
 function searchLocal(q,extra){
   q=norm(q).trim();
   var all=(extra||[]).concat(FOODS);
   if(!q)return all.slice(0,40);
-  var words=q.split(/\s+/);
-  return all.filter(function(f){var n=norm(f.name);return words.every(function(w){return n.indexOf(w)>-1;});}).slice(0,40);
+  var words=q.split(/\s+/),first=words[0];
+  var hit=all.filter(function(f){var n=norm(f.name);return words.every(function(w){return n.indexOf(w)>-1;});});
+  hit.sort(function(a,b){
+    var sa=norm(a.name).indexOf(first)===0?0:1,sb=norm(b.name).indexOf(first)===0?0:1;
+    return sa-sb||a.name.length-b.name.length;
+  });
+  return hit.slice(0,40);
+}
+
+/* Receita: ingredientes [{n,g,b}] e número de porções. Retorna a base por 100 g e o peso de uma porção. */
+function recipe(ings,serv){
+  serv=+serv;
+  if(!ings||!ings.length||!(serv>=1&&serv<=100))return null;
+  var totalG=0,t={k:0,p:0,c:0,f:0},fi=0,su=0,na=0,hasFi=false,hasSu=false,hasNa=false;
+  ings.forEach(function(i){
+    var v=scale(i.b,i.g);totalG+=i.g;t.k+=v.k;t.p+=v.p;t.c+=v.c;t.f+=v.f;
+    if(v.fi!=null){fi+=v.fi;hasFi=true;}if(v.su!=null){su+=v.su;hasSu=true;}if(v.na!=null){na+=v.na;hasNa=true;}
+  });
+  if(!(totalG>0))return null;
+  var f100=100/totalG,b={k:r1(t.k*f100),p:r1(t.p*f100),c:r1(t.c*f100),f:r1(t.f*f100)};
+  if(hasFi)b.fi=r1(fi*f100);if(hasSu)b.su=r1(su*f100);if(hasNa)b.na=Math.round(na*f100);
+  var g=Math.max(1,Math.round(totalG/serv));
+  return {b:b,g:g,totalG:Math.round(totalG),perServ:scale(b,g),total:{k:Math.round(t.k),p:r1(t.p),c:r1(t.c),f:r1(t.f)}};
 }
 
 /* Open Food Facts: normaliza um produto para o formato do app; descarta os sem calorias. */
@@ -93,9 +95,15 @@ function fromOFF(p){
   k=parseFloat(k);
   if(!p||!p.product_name||!isFinite(k))return null;
   function v(x){x=parseFloat(x);return isFinite(x)&&x>=0?x:0;}
+  function has(x){x=parseFloat(x);return isFinite(x)&&x>=0;}
   var sq=parseFloat(p.serving_quantity);
+  var b={k:Math.round(k),p:r1(v(n.proteins_100g)),c:r1(v(n.carbohydrates_100g)),f:r1(v(n.fat_100g))};
+  if(has(n.fiber_100g))b.fi=r1(v(n.fiber_100g));
+  if(has(n.sugars_100g))b.su=r1(v(n.sugars_100g));
+  if(has(n.sodium_100g))b.na=Math.round(v(n.sodium_100g)*1000);
+  else if(has(n.salt_100g))b.na=Math.round(v(n.salt_100g)/2.5*1000);
   return {id:'o'+(p.code||Math.random().toString(36).slice(2)),name:String(p.product_name).slice(0,80)+(p.brands?' · '+String(p.brands).split(',')[0].slice(0,30):''),
-    src:'off',code:p.code||'',g:sq>0&&sq<=1000?Math.round(sq):100,b:{k:Math.round(k),p:r1(v(n.proteins_100g)),c:r1(v(n.carbohydrates_100g)),f:r1(v(n.fat_100g))}};
+    src:'off',code:p.code||'',g:sq>0&&sq<=1000?Math.round(sq):100,b:b};
 }
 var OFF='https://world.openfoodfacts.org';
 var FIELDS='code,product_name,brands,nutriments,serving_quantity';
@@ -111,5 +119,5 @@ function searchOFF(q,signal){
     .then(function(j){return (j.products||[]).map(fromOFF).filter(Boolean);});
 }
 
-window.ENGEFIT_DIET={MEALS:MEALS,MEAL_PCT:MEAL_PCT,FOODS:FOODS,scale:scale,sum:sum,macroGrams:macroGrams,defaultGoal:defaultGoal,suggest:suggest,searchLocal:searchLocal,searchOFF:searchOFF};
+window.ENGEFIT_DIET={MEALS:MEALS,MEAL_PCT:MEAL_PCT,FOODS:FOODS,scale:scale,sum:sum,macroGrams:macroGrams,microGoals:microGoals,defaultGoal:defaultGoal,suggest:suggest,searchLocal:searchLocal,recipe:recipe,searchOFF:searchOFF};
 })();
