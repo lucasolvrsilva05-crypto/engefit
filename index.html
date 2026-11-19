@@ -350,6 +350,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .ptr{display:block;width:100%;height:auto;border-radius:10px;user-select:none;-webkit-user-drag:none}.av .ptr{border-radius:50%;height:100%;object-fit:cover}
 .av.has{background:#07101f;border-color:rgba(63,184,255,.5);padding:0}
 .statuswin{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:18px;padding:14px 18px;margin-bottom:18px;align-items:center}
+.rcbox{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;border:1px dashed rgba(63,184,255,.6);border-radius:8px;background:rgba(63,184,255,.06)}.rccode{font-size:20px;letter-spacing:.08em;font-weight:700;color:#e8f4ff;user-select:all}
 .statuswin .avfull svg{width:100%;height:auto;display:block}
 .statuswin h2{font-size:26px}
 .avduo{display:grid;grid-template-columns:1fr 1fr;gap:4px}
@@ -649,7 +650,7 @@ var LOGO='<svg viewBox="0 0 44 28" fill="none" stroke="currentColor" stroke-widt
 function pwField(id,label,ac){return '<label class="fl" for="'+id+'">'+label+'<span class="pw"><input type="password" id="'+id+'" autocomplete="'+ac+'" minlength="6"><button type="button" data-act="pw-toggle" data-for="'+id+'" aria-label="Mostrar senha">Mostrar</button></span></label>';}
 function showAuth(mode){
   if(mode)authMode=mode;
-  if(['login','signup','loading','config','fail','profile'].indexOf(authMode)<0)authMode='login';
+  if(['login','signup','loading','config','fail','profile','recover','recovered'].indexOf(authMode)<0)authMode='login';
   document.body.classList.add('authmode');
   var el=$('#auth');el.hidden=false;
   var m=authMsg?'<div class="amsg '+authMsg[0]+'" role="alert">'+esc(authMsg[1])+'</div>':'';
@@ -658,6 +659,14 @@ function showAuth(mode){
   else if(authMode==='config')h='<div class="authcard"><h1>Configuração pendente</h1><p class="sub" style="margin:0">O servidor de contas ainda não foi ligado a este site. Volte em alguns minutos.</p></div>';
   else if(authMode==='fail')h='<div class="authcard"><h1>Não deu para carregar</h1><p class="sub">No primeiro acesso de cada aparelho é preciso internet para buscar seus treinos.</p><button class="btn primary block" data-act="auth-retry">Tentar de novo</button><div class="alinks"><button class="linkbtn" data-act="logout">Sair da conta</button></div></div>';
   else if(authMode==='profile')h=profileFormHTML(m);
+  else if(authMode==='recover')h='<form class="authcard" id="af" novalidate><h1>Recuperar conta</h1><p class="sub">Use o código de recuperação que você guardou (formato XXXX-XXXX-XXXX).</p>'+m+
+      '<label class="fl" for="au">Nome de usuário<span class="pw at"><b aria-hidden="true">@</b><input id="au" maxlength="21" autocapitalize="none" autocomplete="username" spellcheck="false" value="'+un+'"></span></label>'+
+      '<label class="fl" for="arc">Código de recuperação<input id="arc" maxlength="20" autocapitalize="characters" autocomplete="one-time-code" spellcheck="false" placeholder="XXXX-XXXX-XXXX…" class="mono"></label>'+
+      pwField('ap','Senha nova (mínimo 6 caracteres)','new-password')+pwField('ap2','Repita a senha nova','new-password')+
+      '<button class="btn primary block" type="submit" id="asub">Trocar senha</button><div class="alinks"><button type="button" class="linkbtn" data-act="auth-mode" data-v="login">Voltar para entrar</button></div>'+
+      '<p class="note" style="margin:12px 0 0;text-align:center">Sem o código, fale com o administrador do ENGEFIT.</p></form>';
+  else if(authMode==='recovered')h='<div class="authcard"><h1>Senha trocada</h1><p class="sub">Seu código antigo deixou de valer. Guarde o código novo abaixo: é ele que recupera a conta da próxima vez.</p>'+rcBox(recNew)+
+      '<button class="btn primary block" data-act="rec-enter">Já guardei, entrar</button></div>';
   else{
     var su=authMode==='signup';
     h='<form class="authcard" id="af" novalidate><h1>'+(su?'Criar conta':'Entrar')+'</h1><p class="sub">'+(su?'Só nome de usuário e senha. Não pedimos e-mail.':'Acesse seus treinos de qualquer aparelho.')+'</p>'+m+
@@ -665,10 +674,10 @@ function showAuth(mode){
       '<label class="fl" for="au">Nome de usuário<span class="pw at"><b aria-hidden="true">@</b><input id="au" maxlength="21" autocapitalize="none" autocomplete="username" spellcheck="false" value="'+un+'"></span></label>'+
       (su?'<p class="note" style="margin:-6px 0 14px">De 3 a 20 caracteres: letras minúsculas, números, ponto e _. É o seu login e não pode ser trocado depois.</p>':'')+
       (su?pwField('ap','Senha (mínimo 6 caracteres)','new-password')+pwField('ap2','Repita a senha','new-password'):pwField('ap','Senha','current-password'))+
-      (su?'<label class="chkrow"><input type="checkbox" id="apriv"><span><b>Perfil privado</b><br><small>Só quem você aprovar vê seus treinos. Sem marcar, qualquer pessoa com conta no ENGEFIT pode ver.</small></span></label><p class="note" style="margin:0 0 14px">Guarde bem a senha: sem e-mail, não há recuperação automática.</p>':'')+
+      (su?'<label class="chkrow"><input type="checkbox" id="apriv"><span><b>Perfil privado</b><br><small>Só quem você aprovar vê seus treinos. Sem marcar, qualquer pessoa com conta no ENGEFIT pode ver.</small></span></label><p class="note" style="margin:0 0 14px">Sem e-mail: depois de entrar, gere o seu código de recuperação em Status.</p>':'')+
       '<button class="btn primary block" type="submit" id="asub">'+(su?'Criar conta':'Entrar')+'</button><div class="alinks">'+
       (su?'<button type="button" class="linkbtn" data-act="auth-mode" data-v="login">Já tenho conta</button>':'<button type="button" class="linkbtn" data-act="auth-mode" data-v="signup">Criar conta</button>')+
-      '</div>'+(su?'':'<p class="note" style="margin:12px 0 0;text-align:center">Esqueceu a senha? Fale com o administrador do ENGEFIT.</p>')+'</form>';
+      '</div>'+(su?'':'<div class="alinks" style="margin-top:6px"><button type="button" class="linkbtn" data-act="auth-mode" data-v="recover">Esqueci minha senha</button></div>')+'</form>';
   }
   el.innerHTML='<div class="authbox"><div class="logo">'+LOGO+'</div>'+h+'<p class="authfoot">Registre. Meça. Progrida com carga.'+(isStandalone()?'':'<br><button type="button" class="linkbtn" data-act="install" style="margin-top:10px;font-family:var(--body)">Instalar o app no celular</button>')+'</p></div>';
   var f=Array.prototype.filter.call(el.querySelectorAll('input:not([type=checkbox])'),function(i){return !i.value;})[0];
@@ -693,12 +702,13 @@ function authFail(t){
   authMsg=['err',t];var f=$('#af');if(!f){showAuth();return;}
   var a=f.querySelector('.amsg');if(!a){a=document.createElement('div');a.setAttribute('role','alert');f.querySelector('.sub').insertAdjacentElement('afterend',a);}
   a.className='amsg err';a.textContent=t;
-  var b=$('#asub');if(b){b.disabled=false;b.textContent=authMode==='signup'?'Criar conta':authMode==='profile'?'Continuar':'Entrar';}
+  var b=$('#asub');if(b){b.disabled=false;b.textContent=authMode==='signup'?'Criar conta':authMode==='profile'?'Continuar':authMode==='recover'?'Trocar senha':'Entrar';}
 }
 document.addEventListener('submit',function(e){
   if(!e.target||e.target.id!=='af')return;
   e.preventDefault();
   if(authMode==='profile'){submitProfile();return;}
+  if(authMode==='recover'){submitRecover();return;}
   var v=function(id){var x=$('#'+id);return x?x.value:'';};
   var raw=v('au').trim().replace(/^@/,''),un=cleanUname(raw),pw=v('ap'),name=v('an').trim().slice(0,60);
   authUser=raw;
@@ -733,11 +743,57 @@ function enter(u,fresh){
   });
 }
 var justSigned=false;
+
+/* ====== Recuperação de conta sem e-mail ======
+   O código (XXXX-XXXX-XXXX) é gerado no servidor e mostrado uma única vez; lá fica só o hash.
+   Funções no Supabase: engefit_novo_codigo, engefit_tem_codigo, engefit_recuperar (supabase/xp_recuperacao.sql). */
+var recNew='',recPw='',rc={on:false,has:false};
+function rcBox(c){return '<div class="rcbox"><output class="rccode mono" aria-label="Código de recuperação">'+esc(c)+'</output><button type="button" class="btn sm" data-act="rc-copy" data-v="'+esc(c)+'">Copiar</button></div><p class="note" style="margin:8px 0 14px">Anote num lugar seguro (gerenciador de senhas, foto guardada, papel). Quem tiver o código e o seu @usuário consegue trocar a senha.</p>';}
+function submitRecover(){
+  var v=function(id){var x=$('#'+id);return x?x.value:'';};
+  var un=cleanUname(v('au').trim().replace(/^@/,'')),code=v('arc').toUpperCase().replace(/[^A-Z0-9]/g,''),pw=v('ap');
+  authUser=un;
+  if(!UNAME.test(un)){authFail('Confira o nome de usuário.');return;}
+  if(code.length!==12){authFail('O código tem 12 letras e números (XXXX-XXXX-XXXX).');return;}
+  if(pw.length<6){authFail('A senha precisa ter pelo menos 6 caracteres.');return;}
+  if(pw!==v('ap2')){authFail('As duas senhas não são iguais.');return;}
+  var b=$('#asub');b.disabled=true;b.textContent='Aguarde…';
+  sb.rpc('engefit_recuperar',{p_usuario:un,p_codigo:code,p_senha:pw}).then(function(r){
+    if(r.error){authFail(/function|does not exist|schema cache/i.test(r.error.message||'')?'A recuperação por código ainda não foi ativada. Fale com o administrador do ENGEFIT.':authErr(r.error));return;}
+    var d=r.data||{};
+    if(!d.ok){authFail(d.erro==='tentativas'?'Muitas tentativas erradas. Espere uma hora e tente de novo.':d.erro==='senha'?'A senha precisa ter pelo menos 6 caracteres.':'Usuário ou código incorreto.');return;}
+    recNew=d.codigo;recPw=pw;authMsg=null;showAuth('recovered');
+  }).catch(function(e){authFail(authErr(e));});
+}
+function recEnter(){
+  var b=document.querySelector('[data-act=rec-enter]');if(b){b.disabled=true;b.textContent='Entrando…';}
+  sb.auth.signInWithPassword({email:loginId(authUser),password:recPw}).then(function(r){
+    recPw='';recNew='';if(r.error)throw r.error;rc.has=true;return enter(r.data.user,true);
+  }).catch(function(e){authMsg=['err',authErr(e)];showAuth('login');});
+}
+function rcCheck(){
+  if(!sb||!user)return;
+  sb.rpc('engefit_tem_codigo').then(function(r){if(r.error){rc.on=false;return;}rc.on=true;rc.has=!!r.data;if(ui.view==='inicio'||ui.view==='perfil')render();}).catch(function(){});
+}
+function rcNew(){
+  function go(){
+    sb.rpc('engefit_novo_codigo').then(function(r){
+      if(r.error)throw r.error;rc.has=true;
+      pushModal({title:'Código de recuperação',html:function(){return head('Seu código de recuperação')+'<p class="note" style="margin:-6px 0 12px">Ele aparece só agora. Se você esquecer a senha, use “Esqueci minha senha” na tela de entrar com o seu @usuário e este código.</p>'+rcBox(r.data)+'<div class="row end"><button class="btn primary" data-act="modal-close">Já guardei</button></div>';}});
+      render();
+    }).catch(function(){toast('Não deu para gerar o código. Verifique sua conexão.');});
+  }
+  if(rc.has)confirmM('Gerar um código novo?','O código anterior deixa de funcionar na hora.','Gerar novo',go);else go();
+}
+function rcCardHTML(){
+  if(!rc.on)return '';
+  return '<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:4px">Código de recuperação</h3><p class="note" style="margin-bottom:12px">'+(rc.has?'Sua conta já tem um código. Se perdeu, gere outro: o anterior deixa de valer.':'Sem e-mail, este código é a única forma de recuperar a conta se você esquecer a senha.')+'</p><button class="btn sm'+(rc.has?'':' primary')+'" data-act="rc-new">'+(rc.has?'Gerar código novo':'Gerar meu código')+'</button></div>';
+}
 function finishEnter(fresh){
   hideAuth();authMode='login';
   if(justSigned){justSigned=false;S.pendingPosts=S.workouts.map(function(w){return w.id;});save();}
   if(fresh||!location.hash||/access_token|type=|error/.test(location.hash)){try{history.replaceState(null,'',location.pathname+'#inicio');}catch(e){}window.scrollTo(0,0);}
-  route();render();flushPosts();
+  route();render();flushPosts();rcCheck();
   if(needsOnboard())showOnboard();
 }
 function logout(){
@@ -1175,7 +1231,7 @@ function refreshRelations(){
 function loadSocial(){
   soc.ok=false;
   function q(){return sb.from('profiles').select(pcols()).eq('id',user.id).maybeSingle();}
-  function fb(r){if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
+  function fb(r){if(r.error&&!NOXP&&/\b(xp|lv|rk)\b/i.test(r.error.message||'')){NOXP=true;return q().then(fb);}if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
   return q().then(fb).then(function(r){
     if(r.error)throw r.error;
     soc.prof=r.data;soc.ok=true;
@@ -1270,9 +1326,11 @@ function personRow(p,extra){
 }
 
 /* Avatar do Sistema (masculino/feminino) e corpo pelas medidas */
-var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false;
+var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false,NOXP=false;
 var NOPN=false;
-function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no');}
+function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no')+(NOXP?'':',xp,lv,rk');}
+// Avatar público de alguém com nível/XP/rank validados pelo servidor (colunas xp, lv, rk), quando existem.
+function srvAv(p){var a=Object.assign({},(p&&p.avatar)||{});if(p&&!NOXP&&p.lv!=null){a.lv=+p.lv;a.xp=+p.xp||0;a.rank=p.rk||rankOf(a.lv);}return a;}
 function pno(p){return p&&p.player_no?'Jogador #'+p.player_no:'';}
 var MED=[['cin','Cintura','cm',40,250,'84'],['qua','Quadril','cm',50,250,'98'],['pei','Peito','cm',50,250,'100'],['bra','Braço','cm',15,80,'34'],['cox','Coxa','cm',25,120,'56'],['gor','Gordura','%',3,70,'18']];
 function pnum(v){v=String(v==null?'':v).trim().replace(',','.');if(!v)return null;var n=parseFloat(v);return isNaN(n)?NaN:Math.round(n*10)/10;}
@@ -1291,7 +1349,7 @@ function avSVG(a,view,label){if(!a||!a.g)return '';
   if(PT&&view!=='body')return PT.img({g:a.g,skin:a.skin,hair:a.hair},(AV&&AV.AURA[a.rank])||'#9aa4b5',view==='head'?'head':'bust',label);
   if(!AV)return '';return AV.svg({g:a.g,skin:a.skin,hair:a.hair,rank:a.rank,fat:a.fat,mus:a.mus,view:view==='body'?'full':view,label:label});}
 function avHTML(p,me){
-  var a=me?pubAvatar():(p&&p.avatar),nm=me?(S.settings.name||'A'):pname(p);
+  var a=me?pubAvatar():srvAv(p),nm=me?(S.settings.name||'A'):pname(p);
   if(a&&a.g&&AV)return '<span class="av has'+(me?' me':'')+'">'+avSVG(a,'head','Avatar de '+(nm||'pessoa'))+'</span>';
   return '<span class="av'+(me?' me':'')+'">'+esc((nm||'?').charAt(0).toUpperCase())+'</span>';
 }
@@ -1450,7 +1508,7 @@ function dkOff(dk,n){var d=new Date(dk+'T12:00:00');d.setDate(d.getDate()+n);ret
 function wkDay(dk){return S.workouts.some(function(w){return dkey(w.start)===dk;});}
 function dayEval(dk){
   var r=(S.daily&&S.daily[dk])||{},rt=planRoutine(dk),train=!!rt,hasPlan=!!(S.settings.plan&&S.settings.plan.map);
-  var o={dk:dk,train:train,rt:rt,steps:(r.st||0)>=stepsGoal(),water:(r.w||0)>=waterGoal(),trained:wkDay(dk),chal:!!(r.ch&&r.ch.length>=4),pen:!!(r.pd)};
+  var o={dk:dk,train:train,rt:rt,steps:(r.st||0)>=stepsGoal()&&(r.st||0)<=100000,water:(r.w||0)>=waterGoal()&&(r.w||0)<=15000,trained:wkDay(dk),chal:!!(r.ch&&r.ch.length>=4),pen:!!(r.pd)};
   o.req=o.steps&&o.water&&(!train||o.trained);
   return o;
 }
@@ -1506,9 +1564,10 @@ function xpNeed(n){return 100+20*(n-1);}
 function rankOf(lv){return lv>=55?'S':lv>=35?'A':lv>=20?'B':lv>=10?'C':lv>=5?'D':'E';}
 function xpTotal(){
   var x=0,days={};
-  S.workouts.forEach(function(w){var s=wkStats(w);x+=Math.min(100,40+2*s.sets);days[dkey(w.start)]=1;});
+  var t=today(),per={};
+  S.workouts.forEach(function(w){var k=dkey(w.start);if(k>t)return;(per[k]=per[k]||[]).push(Math.min(100,40+2*wkStats(w).sets));});
+  Object.keys(per).forEach(function(k){per[k].sort(function(a,b){return b-a;}).slice(0,2).forEach(function(v){x+=v;});});
   Object.keys(S.daily||{}).forEach(function(k){days[k]=1;});
-  var t=today();
   Object.keys(days).forEach(function(k){
     if(k>t)return;var e=dayEval(k),r=(S.daily&&S.daily[k])||{};
     if(e.steps)x+=15;if(e.water)x+=15;if(e.req)x+=30;if(e.chal)x+=25;if((r.pc||[]).length>=4)x+=20;
@@ -1619,7 +1678,7 @@ function vPessoas(){
   if(!soc.prof)return h+'<div class="card"><p class="empty">Sem conexão com a comunidade agora. Tente de novo em instantes.</p></div></div>';
   var tab=ui.gtab||'pessoas';
   h+='<div class="seg" role="tablist" style="margin-bottom:14px">'+[['pessoas','Pessoas'],['rank','Ranking geral']].map(function(x){return '<button role="tab" data-act="gtab" data-v="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'" aria-selected="'+(tab===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>';
-  if(tab==='rank')return h+'<p class="note" style="margin:-4px 0 12px">Ordem: maior nível primeiro; no empate, quem tem mais XP.</p><div id="rlist" class="stack"></div></div>';
+  if(tab==='rank')return h+'<p class="note" style="margin:-4px 0 12px">Ordem: maior nível primeiro; no empate, quem tem mais XP.'+(NOXP?'':' O XP do ranking é conferido pelo Sistema a partir dos seus registros.')+'</p><div id="rlist" class="stack"></div></div>';
   return h+'<input type="search" id="pq" data-bind="pq" placeholder="Buscar por nome ou @usuário…" aria-label="Buscar pessoas" value="'+esc(ui.pq||'')+'"><div id="plist" class="stack" style="margin-top:14px"></div></div>';
 }
 var pgen=0,ptimer=null,rgen=0;
@@ -1628,7 +1687,7 @@ function loadRanking(){
   var g=++rgen;if(!el.innerHTML)el.innerHTML='<div class="spin" role="status" aria-label="Carregando"></div>';
   sb.from('profiles').select(pcols()).limit(1000).then(function(r){
     if(g!==rgen)return;if(r.error)throw r.error;
-    var me=pubAvatar(),rows=r.data.map(function(p){var a=p.id===user.id?me:(p.avatar||{});soc.people[p.id]=p;return {p:p,a:a,lv:+a.lv||1,xp:+a.xp||0};});
+    var me=pubAvatar(),rows=r.data.map(function(p){var a=srvAv(p);if(p.id===user.id){var mine=Object.assign({},me);if(!NOXP&&p.lv!=null){mine.lv=a.lv;mine.xp=a.xp;mine.rank=a.rank;}a=mine;}soc.people[p.id]=p;return {p:p,a:a,lv:+a.lv||1,xp:+a.xp||0};});
     rows.sort(function(x,y){return y.lv-x.lv||y.xp-x.xp||pname(x.p).localeCompare(pname(y.p));});
     var mine=-1;rows.forEach(function(x,i){if(x.p.id===user.id)mine=i;});
     function row(x,i){var rk=x.a.rank||rankOf(x.lv),col=AV?AV.AURA[rk]:'#9aa4b5',me2=x.p.id===user.id;
@@ -1686,7 +1745,7 @@ function openProfile(uid){
       if(!p)return head('Perfil')+'<div class="spin" role="status" aria-label="Carregando"></div>';
       var me=uid===user.id,vis=me||!p.is_private||soc.following[uid]==='accepted',s=st.stats||{};
       var h=head(pname(p))+'<p class="note" style="margin:-8px 0 14px">@'+esc(p.username)+(p.player_no?' · Jogador #'+p.player_no:'')+(p.is_private?' · <span class="tag">Privado</span>':'')+'</p>';
-      var pa=me?pubAvatar():p.avatar;if(pa&&pa.g&&AV)h+='<div class="sys profav">'+avSVG(pa,'bust','Avatar de '+pname(p))+'</div>';
+      var pa=me?pubAvatar():srvAv(p);if(pa&&pa.g&&AV)h+='<div class="sys profav">'+avSVG(pa,'bust','Avatar de '+pname(p))+'</div>';
       h+='<div class="kv"><div class="tile"><span class="lbl">Treinos</span><b>'+(s.workouts!=null?s.workouts:'–')+'</b></div><div class="tile"><span class="lbl">Seguidores</span><b>'+(s.followers!=null?s.followers:'–')+'</b></div><div class="tile"><span class="lbl">Seguindo</span><b>'+(s.following!=null?s.following:'–')+'</b></div></div>';
       if(!me)h+='<div class="row" style="margin-bottom:16px"><span data-fbtn="'+uid+'">'+fbtn(uid)+'</span></div>';
       if(!vis)return h+'<div class="card"><p class="empty">Este perfil é privado. '+(soc.following[uid]==='pending'?'Seu pedido está aguardando aprovação.':'Siga para pedir acesso aos treinos.')+'</p></div>';
@@ -1783,8 +1842,8 @@ var pnTimer=null;
 
 function socCfgHTML(){
   if(!soc.prof)return '';
-  return '<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:10px">Perfil na comunidade</h3><label class="chkrow" style="margin:0"><input type="checkbox" id="cpriv" data-check="priv"'+(soc.prof.is_private?' checked':'')+'><span><b>Perfil privado</b><br><small>Só seguidores aprovados veem seus treinos. Ao deixar público, os pedidos pendentes são aceitos.</small></span></label></div>'+
-    '<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:4px">Trocar senha</h3><p class="note" style="margin-bottom:12px">Sem e-mail não há recuperação automática: guarde a senha nova.</p>'+pwField('npw','Senha nova (mínimo 6 caracteres)','new-password')+pwField('npw2','Repita a senha nova','new-password')+'<button class="btn sm" data-act="chpw">Salvar senha nova</button></div>';
+  return rcCardHTML()+'<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:10px">Perfil na comunidade</h3><label class="chkrow" style="margin:0"><input type="checkbox" id="cpriv" data-check="priv"'+(soc.prof.is_private?' checked':'')+'><span><b>Perfil privado</b><br><small>Só seguidores aprovados veem seus treinos. Ao deixar público, os pedidos pendentes são aceitos.</small></span></label></div>'+
+    '<div class="card" style="margin-bottom:14px"><h3 style="margin-bottom:4px">Trocar senha</h3><p class="note" style="margin-bottom:12px">Guarde a senha nova. Se esquecer, use o seu código de recuperação.</p>'+pwField('npw','Senha nova (mínimo 6 caracteres)','new-password')+pwField('npw2','Repita a senha nova','new-password')+'<button class="btn sm" data-act="chpw">Salvar senha nova</button></div>';
 }
 function changePw(){
   var a=$('#npw').value,b=$('#npw2').value;
@@ -1869,6 +1928,7 @@ function vInicio(){
   ws.forEach(function(w){var s=wkStats(w);v+=s.vol;n+=s.sets;});
   var hoje=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   var h=ph(hoje,'Olá, '+(S.settings.name||'Atleta'))+'<div class="wrap">';
+  if(rc.on&&!rc.has&&S.settings.goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px;gap:12px"><div><b>Proteja sua conta</b><p class="note">Sem e-mail, o código de recuperação é o que salva sua conta se você esquecer a senha.</p></div><button class="btn sm primary" data-act="rc-new">Gerar código</button></div>';
   if(!S.settings.goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px"><div><b>Complete seu cadastro no Sistema</b><p class="note">Escolha avatar e objetivo para receber missões sob medida.</p></div><button class="btn sm primary" data-act="onb-open">Continuar</button></div>';
   h+=heroHTML()+missionsHTML()+planHTML();
   h+='<div class="tiles"><div class="tile"><span class="lbl">Treinos · 7 dias</span><b>'+ws.length+'</b></div><div class="tile"><span class="lbl">Volume · 7 dias</span><b>'+fmtVol(v)+'</b></div><div class="tile"><span class="lbl">Séries · 7 dias</span><b>'+n+'</b></div></div>';
@@ -2169,6 +2229,9 @@ var ACT={
  'rm-follower':function(el){var id=el.dataset.id;confirmM('Remover seguidor','@'+((soc.people[id]||{}).username||'')+' deixa de seguir você.','Remover',function(){answerRequest(id,false,'Seguidor removido.');},true);},
  'soc-list':function(el){socList(el.dataset.v);},
  'chpw':changePw,
+ 'rc-new':rcNew,
+ 'rec-enter':recEnter,
+ 'rc-copy':function(el){var c=el.dataset.v;(navigator.clipboard?navigator.clipboard.writeText(c):Promise.reject()).then(function(){toast('Código copiado.');}).catch(function(){toast('Não deu para copiar. Anote: '+c);});},
  'routine-new':function(){routineEditor(null);},
  'routine-edit':function(el){routineEditor(el.dataset.id);},
  'routine-dup':function(el){var r=S.routines.filter(function(x){return x.id===el.dataset.id;})[0],c=JSON.parse(JSON.stringify(r));c.id=uid();c.name+=' (cópia)';S.routines.push(c);save();render();toast('Treino duplicado.');},
