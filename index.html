@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ENGEFIT</title>
 <meta name="description" content="Registre treinos, acompanhe cargas e evolua com dados.">
 <meta name="theme-color" content="#050912">
@@ -27,7 +27,9 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
-body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--body);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--body);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:rgba(63,184,255,.18)}
+button,a,input,select,textarea,label,summary{touch-action:manipulation}
+@media (pointer:fine){html{overscroll-behavior:none}}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0;text-wrap:balance}
@@ -57,7 +59,7 @@ a{color:inherit}
 .tabs{display:none}
 
 /* Cabeçalho de página */
-.ph{margin:0 -24px 22px;padding:30px 24px 22px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border-bottom:1px solid var(--line)}
+.ph{margin:0 -24px 22px;padding:calc(30px + env(safe-area-inset-top)) 24px 22px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;border-bottom:1px solid var(--line)}
 .ph .wrap{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
 .eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 
@@ -92,6 +94,7 @@ a{color:inherit}
 .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .fl{display:flex;flex-direction:column;gap:6px;font-weight:500;font-size:14px;margin-bottom:12px}
 input[type=text],input[type=search],input[type=date],input[type=password],input[type=email],input:not([type]),input[inputmode],select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-height:42px}
+select,option{background-color:var(--surface);color:var(--ink)}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
 .empty{color:var(--muted);padding:18px 4px;text-align:center}
 .note{font-size:13px;color:var(--muted)}
@@ -133,7 +136,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .chk{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);display:grid;place-items:center;color:var(--muted)}
 .chk svg{width:20px;height:20px}
 .set.done .chk{background:var(--good);border-color:var(--good);color:#fff}
-.x{width:28px;height:28px;border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;border-radius:6px}
+.x{width:36px;height:36px;border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;border-radius:6px}
 .x:hover{color:var(--bad);background:var(--surface2)}
 .exmenu{display:flex;gap:2px}
 
@@ -147,7 +150,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 
 /* Exercícios */
 .exlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
-.exitem{display:grid;grid-template-columns:56px 1fr auto;gap:2px 12px;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;width:100%;align-items:center}
+.exitem{content-visibility:auto;contain-intrinsic-size:auto 72px;display:grid;grid-template-columns:56px 1fr auto;gap:2px 12px;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;width:100%;align-items:center}
 .exitem:last-child{border-bottom:0}
 .exitem:hover{background:var(--surface2)}
 .exitem .exname{font-weight:600}
@@ -195,7 +198,7 @@ svg.ch{width:100%;height:auto;display:block}
 #modal{position:fixed;inset:0;z-index:20;display:none}
 #modal.open{display:block}
 .backdrop{position:absolute;inset:0;background:rgba(8,14,20,.55)}
-.sheet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,calc(100% - 24px));max-height:calc(100% - 32px);overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px}
+.sheet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,calc(100% - 24px));max-height:calc(100% - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px}
 .sh-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
 .rrow{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 12px;margin-bottom:10px}
 .rtop{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
@@ -230,7 +233,7 @@ body.authmode .app,body.authmode .tabs,body.authmode #dock{display:none}
 .amsg.err{background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad)}
 .amsg.ok{background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--good)}
 .alinks{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:14px}
-.linkbtn{border:0;background:none;padding:0;color:var(--blue);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.linkbtn{border:0;background:none;padding:8px 2px;min-height:36px;color:var(--blue);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .authfoot{text-align:center;font:500 11px/1.5 var(--mono);color:var(--muted)}
 .sync{display:inline-flex;align-items:center;gap:6px;font:500 11px/1.3 var(--mono);color:var(--muted)}
 .sync i{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none}
@@ -286,10 +289,10 @@ body:not(.authmode) #install{margin-left:var(--side)}
 
 @media (max-width:860px){
   .side{display:none}
-  .main{margin-left:0;padding:0 16px 150px}
+  .main{margin-left:0;padding:0 max(16px,env(safe-area-inset-right)) calc(150px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
   .ph{margin:0 -16px 18px;padding:22px 16px 18px}
   h1{font-size:30px}
-  .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;height:var(--tabh);background:var(--surface);border-top:1px solid var(--line);z-index:7}
+  .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;height:calc(var(--tabh) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);background:var(--surface);border-top:1px solid var(--line);z-index:7}
   .tabs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:var(--muted);font-size:11px;font-weight:600}
   .tabs a svg{width:22px;height:22px}
   .tabs a.on{color:var(--accent)}
@@ -381,6 +384,12 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .lrow{flex-wrap:nowrap}.lrow .pinfo{min-width:0}.lrow .namebtn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .lstat{display:flex;align-items:center;gap:10px;text-align:right}.lstat span{display:grid}.lstat small{color:var(--muted);font-size:12px}
 .rank.sm{width:32px;height:32px;font-size:18px}
+
+.exitem:hover,.goal:hover,.chalbtn:hover,.sw:hover,.chip:hover{border-color:var(--accent)}
+.exitem:hover{background:rgba(63,184,255,.06)}
+.linkbtn:hover{color:#cdeeff}
+.x:hover{color:var(--ink);background:var(--surface2)}
+@media (max-width:380px){.avpick{grid-template-columns:96px minmax(0,1fr);gap:10px}.avpick .swatches{gap:7px}.sw{width:32px;height:32px}.onbcard{padding:16px}}
 </style>
 </head>
 <body>
@@ -604,7 +613,7 @@ function loadUserData(){
 }
 
 /* ====== Tela de acesso ====== */
-var LOGO='<svg viewBox="0 0 44 28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8v12M9 5v18M35 5v18M40 8v12M9 14h26"/></svg><b>ENGE<i>FIT</i></b>';
+var LOGO='<svg viewBox="0 0 44 28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 8v12M9 5v18M35 5v18M40 8v12M9 14h26"/></svg><b translate="no">ENGE<i>FIT</i></b>';
 function pwField(id,label,ac){return '<label class="fl" for="'+id+'">'+label+'<span class="pw"><input type="password" id="'+id+'" autocomplete="'+ac+'" minlength="6"><button type="button" data-act="pw-toggle" data-for="'+id+'" aria-label="Mostrar senha">Mostrar</button></span></label>';}
 function showAuth(mode){
   if(mode)authMode=mode;
@@ -620,7 +629,7 @@ function showAuth(mode){
   else{
     var su=authMode==='signup';
     h='<form class="authcard" id="af" novalidate><h1>'+(su?'Criar conta':'Entrar')+'</h1><p class="sub">'+(su?'Só nome de usuário e senha. Não pedimos e-mail.':'Acesse seus treinos de qualquer aparelho.')+'</p>'+m+
-      (su?'<label class="fl" for="an">Seu nome<input id="an" maxlength="60" autocomplete="name" placeholder="Como quer ser chamado"></label>':'')+
+      (su?'<label class="fl" for="an">Seu nome<input id="an" maxlength="60" autocomplete="name" placeholder="Como quer ser chamado…"></label>':'')+
       '<label class="fl" for="au">Nome de usuário<span class="pw at"><b aria-hidden="true">@</b><input id="au" maxlength="21" autocapitalize="none" autocomplete="username" spellcheck="false" value="'+un+'"></span></label>'+
       (su?'<p class="note" style="margin:-6px 0 14px">De 3 a 20 caracteres: letras minúsculas, números, ponto e _. É o seu login e não pode ser trocado depois.</p>':'')+
       (su?pwField('ap','Senha (mínimo 6 caracteres)','new-password')+pwField('ap2','Repita a senha','new-password'):pwField('ap','Senha','current-password'))+
@@ -631,7 +640,7 @@ function showAuth(mode){
   }
   el.innerHTML='<div class="authbox"><div class="logo">'+LOGO+'</div>'+h+'<p class="authfoot">Registre. Meça. Progrida com carga.'+(isStandalone()?'':'<br><button type="button" class="linkbtn" data-act="install" style="margin-top:10px;font-family:var(--body)">Instalar o app no celular</button>')+'</p></div>';
   var f=Array.prototype.filter.call(el.querySelectorAll('input:not([type=checkbox])'),function(i){return !i.value;})[0];
-  if(f)try{f.focus();}catch(e){}
+  if(f&&matchMedia('(pointer:fine)').matches)try{f.focus();}catch(e){}
 }
 function hideAuth(){document.body.classList.remove('authmode');var el=$('#auth');el.hidden=true;el.innerHTML='';}
 /* O Supabase exige um e-mail por conta: usamos um endereço técnico derivado do @usuário, que não existe. */
@@ -785,7 +794,7 @@ function drawModal(){
   var el=$('#modal');
   if(!stack.length){el.innerHTML='';el.classList.remove('open');document.body.classList.remove('lock');return;}
   var m=stack[stack.length-1];
-  el.innerHTML='<div class="backdrop" data-act="modal-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(m.title)+'" tabindex="-1">'+m.html()+'</div>';
+  el.innerHTML='<div class="backdrop" data-act="modal-close" aria-hidden="true"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="'+esc(m.title)+'" tabindex="-1">'+m.html()+'</div>';
   el.classList.add('open');document.body.classList.add('lock');
   if(m.mount)m.mount(el);
 }
@@ -815,7 +824,7 @@ function openPicker(onDone){
     var b=$('#pkdone');b.textContent=sel.size?'Adicionar '+sel.size+(sel.size===1?' exercício':' exercícios'):'Selecione exercícios';b.disabled=!sel.size;b.style.opacity=sel.size?1:.5;
   }
   var m={title:'Adicionar exercício',
-    html:function(){return head('Adicionar exercício')+'<input type="search" id="pq" placeholder="Buscar exercício" aria-label="Buscar exercício" value="'+esc(q)+'"><div class="scroll-x" style="margin-top:10px"><div class="seg" id="pkloc"></div></div><div class="chips scroll-x" id="pkchips" style="margin-top:10px;flex-wrap:nowrap"></div><div class="exlist pklist" id="pklist"></div><div class="row end" style="margin-top:0"><button class="btn ghost sm" data-act="pk-new">Criar exercício</button><button class="btn primary" id="pkdone" data-act="pk-done">Selecione exercícios</button></div>';},
+    html:function(){return head('Adicionar exercício')+'<input type="search" id="pq" placeholder="Buscar exercício…" aria-label="Buscar exercício" value="'+esc(q)+'"><div class="scroll-x" style="margin-top:10px"><div class="seg" id="pkloc"></div></div><div class="chips scroll-x" id="pkchips" style="margin-top:10px;flex-wrap:nowrap"></div><div class="exlist pklist" id="pklist"></div><div class="row end" style="margin-top:0"><button class="btn ghost sm" data-act="pk-new">Criar exercício</button><button class="btn primary" id="pkdone" data-act="pk-done">Selecione exercícios</button></div>';},
     mount:refresh,
     input:function(t){if(t.id==='pq'&&t.value!==q){q=t.value;refresh();}},
     act:function(a,el){
@@ -925,7 +934,7 @@ function vActive(){
   if(!A.exs.length)h+='<p class="empty">Treino vazio. Adicione o primeiro exercício.</p>';
   A.exs.forEach(function(e,i){
     var x=exById(e.ex),ps=prevSets(e.ex);
-    h+='<section class="excard" data-i="'+i+'"><header><div><h3>'+esc(x.name)+'</h3><span class="tag">'+esc(x.m)+'</span></div><div class="exmenu"><button class="x" data-act="ex-up" aria-label="Mover exercício para cima">↑</button><button class="x" data-act="ex-del" aria-label="Remover exercício">×</button></div></header><input class="exnote" data-bind="note" placeholder="Adicionar nota" aria-label="Nota do exercício" value="'+esc(e.note||'')+'"><div class="sethead"><span>Série</span><span>Anterior</span><span>'+unit()+'</span><span>Reps</span><span></span><span></span></div>'+e.sets.map(function(_,j){return setRow(e,i,j,ps);}).join('')+'<button class="btn ghost sm block" style="margin-top:8px" data-act="add-set">+ Adicionar série</button></section>';
+    h+='<section class="excard" data-i="'+i+'"><header><div><h3>'+esc(x.name)+'</h3><span class="tag">'+esc(x.m)+'</span></div><div class="exmenu"><button class="x" data-act="ex-up" aria-label="Mover exercício para cima">↑</button><button class="x" data-act="ex-del" aria-label="Remover exercício">×</button></div></header><input class="exnote" data-bind="note" placeholder="Adicionar nota…" aria-label="Nota do exercício" value="'+esc(e.note||'')+'"><div class="sethead"><span>Série</span><span>Anterior</span><span>'+unit()+'</span><span>Reps</span><span></span><span></span></div>'+e.sets.map(function(_,j){return setRow(e,i,j,ps);}).join('')+'<button class="btn ghost sm block" style="margin-top:8px" data-act="add-set">+ Adicionar série</button></section>';
   });
   return h+'<button class="btn block" data-act="add-ex">+ Adicionar exercício</button></div>';
 }
@@ -1301,7 +1310,7 @@ function missionsHTML(){
     if(m.goal>1)h+='<div class="qbar" role="progressbar" aria-label="'+esc(m.t)+'" aria-valuemin="0" aria-valuemax="'+m.goal+'" aria-valuenow="'+m.v+'"><i style="width:'+pct+'%"></i></div>';
     if(m.note)h+='<p class="note qn">'+esc(m.note)+'</p>';
     if(m.id==='water')h+='<div class="row qact"><button class="btn sm" data-act="water" data-v="250">+ 250 ml</button><button class="btn sm" data-act="water" data-v="500">+ 500 ml</button>'+(m.v?'<button class="btn sm ghost" data-act="water" data-v="-250" aria-label="Desfazer 250 ml">− 250</button>':'')+'</div>';
-    if(m.id==='steps')h+='<div class="row qact"><input id="qsteps" inputmode="numeric" placeholder="Passos de hoje" aria-label="Passos de hoje" value="'+(m.v||'')+'" style="max-width:150px"><button class="btn sm" data-act="steps-save">Salvar passos</button></div><p class="note qn">Por enquanto, copie do app do seu relógio ou celular.</p>';
+    if(m.id==='steps')h+='<div class="row qact"><input id="qsteps" autocomplete="off" inputmode="numeric" placeholder="Passos de hoje…" aria-label="Passos de hoje" value="'+(m.v||'')+'" style="max-width:150px"><button class="btn sm" data-act="steps-save">Salvar passos</button></div><p class="note qn">Por enquanto, copie do app do seu relógio ou celular.</p>';
     if(m.id==='train'&&!m.done&&m.rid)h+='<div class="row qact"><button class="btn sm primary" data-act="start-routine" data-id="'+m.rid+'">Iniciar treino</button></div>';
   });
   h+='</ul>';
@@ -1383,7 +1392,7 @@ function drawOnboard(){
       '</div><div class="row end"><button class="btn ghost" data-act="onb-back">Voltar</button><button class="btn primary" data-act="onb-next"'+(onb.goal?'':' disabled')+'>Continuar</button></div></section>';
   }else if(st===3){
     h='<section class="sys onbcard"><p class="eyebrow">Passo 3 de 4 · Rotina e corpo</p><h1>Sua rotina</h1><div class="lbl">Quantos dias por semana você quer treinar?</div><div class="seg" style="margin:8px 0 18px">'+[2,3,4,5,6].map(function(n){return '<button data-act="onb-set" data-k="days" data-v="'+n+'" class="'+(onb.days===n?'on':'')+'" aria-pressed="'+(onb.days===n)+'">'+n+'</button>';}).join('')+'</div>'+
-      '<div class="measures" style="grid-template-columns:1fr 1fr"><label class="fl">Altura (cm)<input id="onb-alt" inputmode="decimal" placeholder="175" value="'+(onb.alt?esc(String(onb.alt)):'')+'"></label><label class="fl">Peso ('+unit()+')<input id="onb-kg" inputmode="decimal" placeholder="0,0" value="'+(onb.kg?esc(String(onb.kg)):'')+'"></label></div>'+
+      '<div class="measures" style="grid-template-columns:1fr 1fr"><label class="fl">Altura (cm)<input id="onb-alt" autocomplete="off" inputmode="decimal" placeholder="175" value="'+(onb.alt?esc(String(onb.alt)):'')+'"></label><label class="fl">Peso ('+unit()+')<input id="onb-kg" autocomplete="off" inputmode="decimal" placeholder="0,0" value="'+(onb.kg?esc(String(onb.kg)):'')+'"></label></div>'+
       '<p class="note" style="margin:0 0 16px">Opcional. O peso define a meta de água e, com a altura, o corpo do avatar.</p>'+
       '<div class="row end"><button class="btn ghost" data-act="onb-back">Voltar</button><button class="btn primary" data-act="onb-next">Continuar</button></div></section>';
   }else{
@@ -1429,7 +1438,7 @@ function vPessoas(){
   var tab=ui.gtab||'pessoas';
   h+='<div class="seg" role="tablist" style="margin-bottom:14px">'+[['pessoas','Pessoas'],['rank','Ranking geral']].map(function(x){return '<button role="tab" data-act="gtab" data-v="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'" aria-selected="'+(tab===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>';
   if(tab==='rank')return h+'<p class="note" style="margin:-4px 0 12px">Ordem: maior nível primeiro; no empate, quem tem mais XP.</p><div id="rlist" class="stack"></div></div>';
-  return h+'<input type="search" id="pq" data-bind="pq" placeholder="Buscar por nome ou @usuário" aria-label="Buscar pessoas" value="'+esc(ui.pq||'')+'"><div id="plist" class="stack" style="margin-top:14px"></div></div>';
+  return h+'<input type="search" id="pq" data-bind="pq" placeholder="Buscar por nome ou @usuário…" aria-label="Buscar pessoas" value="'+esc(ui.pq||'')+'"><div id="plist" class="stack" style="margin-top:14px"></div></div>';
 }
 var pgen=0,ptimer=null,rgen=0;
 function loadRanking(){
@@ -1741,7 +1750,7 @@ function routineEditor(id){
 function vExercicios(){
   var list=exFilter(ui.exq,ui.exm,ui.exe,ui.exl);
   var h=ph('Biblioteca · '+allEx().length+' exercícios','Exercícios','<button class="btn" data-act="ex-new">+ Criar exercício</button>')+'<div class="wrap">';
-  h+='<div class="filters"><input type="search" id="exq" data-bind="exq" placeholder="Buscar exercício" aria-label="Buscar exercício" value="'+esc(ui.exq)+'"><select id="exe" data-bind="exe" aria-label="Filtrar por equipamento"><option value="">Todo equipamento</option>'+EQUIP.map(function(e){return '<option'+(ui.exe===e?' selected':'')+'>'+e+'</option>';}).join('')+'</select></div>';
+  h+='<div class="filters"><input type="search" id="exq" data-bind="exq" placeholder="Buscar exercício…" aria-label="Buscar exercício" value="'+esc(ui.exq)+'"><select id="exe" data-bind="exe" aria-label="Filtrar por equipamento"><option value="">Todo equipamento</option>'+EQUIP.map(function(e){return '<option'+(ui.exe===e?' selected':'')+'>'+e+'</option>';}).join('')+'</select></div>';
   h+='<div class="scroll-x" style="margin-bottom:10px"><div class="seg" id="exloc" role="group" aria-label="Onde você treina">'+chipsL(ui.exl,'ex-loc')+'</div></div><div class="chips scroll-x" id="exchips" style="margin-bottom:14px;flex-wrap:nowrap;padding-bottom:4px">'+chipsM(ui.exm,'ex-mu')+'</div><p class="note" id="excount" style="margin-bottom:8px">'+list.length+(list.length===1?' exercício':' exercícios')+'</p><div class="exlist" id="exlist">'+exItems(list)+'</div></div>';
   return h;
 }
@@ -1804,9 +1813,9 @@ function pBody(){
   }else if(AV)h+='<div class="card" style="margin-bottom:14px"><p style="margin:0 0 10px">Crie seu avatar e ele vai ganhar a forma das suas medidas.</p><button class="btn sm primary" data-act="av-edit">Criar meu avatar</button></div>';
   h+='<div class="card"><h3 style="margin-bottom:4px">Registrar medidas</h3><p class="note" style="margin-bottom:12px">Use fita métrica, de manhã, sem apertar a pele. Preencha só o que quiser.</p><div class="measures">'+
     '<label class="fl">Data<input type="date" id="bd" value="'+dkey(Date.now())+'"></label>'+
-    '<label class="fl">Altura (cm)<input id="bm-alt" inputmode="decimal" placeholder="175" value="'+(S.settings.altura?num(S.settings.altura,0):'')+'"></label>'+
-    '<label class="fl">Peso ('+unit()+')<input id="bw" inputmode="decimal" placeholder="0,0"></label>'+
-    MED.map(function(m){return '<label class="fl">'+m[1]+' ('+m[2]+')<input id="bm-'+m[0]+'" inputmode="decimal" placeholder="'+m[5]+'"></label>';}).join('')+
+    '<label class="fl">Altura (cm)<input id="bm-alt" autocomplete="off" inputmode="decimal" placeholder="175" value="'+(S.settings.altura?num(S.settings.altura,0):'')+'"></label>'+
+    '<label class="fl">Peso ('+unit()+')<input id="bw" autocomplete="off" inputmode="decimal" placeholder="0,0"></label>'+
+    MED.map(function(m){return '<label class="fl">'+m[1]+' ('+m[2]+')<input id="bm-'+m[0]+'" autocomplete="off" inputmode="decimal" placeholder="'+m[5]+'"></label>';}).join('')+
     '</div><details class="howto"><summary>Como medir</summary><ul><li><b>Cintura:</b> na altura do umbigo, ao final de uma expiração normal.</li><li><b>Quadril:</b> na parte mais larga do glúteo, pés juntos.</li><li><b>Peito:</b> na linha dos mamilos, braços relaxados.</li><li><b>Braço:</b> no meio do braço, relaxado ao lado do corpo.</li><li><b>Coxa:</b> no meio da coxa, em pé.</li><li><b>Gordura:</b> só se você tiver de bioimpedância ou avaliação física.</li></ul></details>'+
     '<button class="btn primary" data-act="body-add">Registrar</button></div>';
   h+='<div class="card" style="margin-top:14px"><div class="lbl" style="margin-bottom:6px">Peso corporal ('+unit()+')</div>'+lineChart(pts,function(v){return num(v,1);})+'</div>';
@@ -1845,7 +1854,7 @@ var NAV=[
 ['perfil','Status','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>']
 ];
 function buildNav(){var h=NAV.map(function(n){return '<a href="#'+n[0]+'" data-nav="'+n[0]+'">'+n[2]+'<span>'+n[1]+'</span></a>';}).join('');$('#navside').innerHTML=h;$('#navtabs').innerHTML=h;}
-function route(){var h=location.hash.slice(1);ui.view=['inicio','treino','exercicios','pessoas','perfil'].indexOf(h)>-1?h:'inicio';}
+function route(){var h=location.hash.slice(1),sub='';if(h.indexOf('/')>-1){sub=h.split('/')[1];h=h.split('/')[0];}ui.view=['inicio','treino','exercicios','pessoas','perfil'].indexOf(h)>-1?h:'inicio';if(h==='pessoas')ui.gtab=sub==='ranking'?'rank':'pessoas';}
 function go(v){if(location.hash==='#'+v){route();render();}else location.hash=v;}
 function drawMini(){
   var el=$('#mini');
@@ -1944,7 +1953,7 @@ var ACT={
  'water':function(el){var r=dayRec(today());r.w=Math.max(0,(r.w||0)+(+el.dataset.v));trimDaily();save();render();},
  'steps-save':function(){var v=parseInt(String($('#qsteps').value).replace(/\D/g,''),10);if(isNaN(v)||v<0||v>100000){toast('Passos: confira o valor.');return;}dayRec(today()).st=v;trimDaily();save();render();toast('Passos salvos.');},
  'plan-gen':function(){planGen();},
- 'gtab':function(el){ui.gtab=el.dataset.v;render();},
+ 'gtab':function(el){ui.gtab=el.dataset.v;try{history.replaceState(null,'','#pessoas'+(ui.gtab==='rank'?'/ranking':''));}catch(e){}render();},
  'chal':function(el){var r=dayRec(today()),k=el.dataset.p==='1'?'pc':'ch',i=+el.dataset.v;r[k]=r[k]||[];var j=r[k].indexOf(i);if(j>-1)r[k].splice(j,1);else r[k].push(i);if(k==='pc'&&r.pc.length>=4)r.pd=1;trimDaily();var before=levelInfo().lv;save();render();var L=levelInfo();if(L.lv>before)toast('Nível '+L.lv+'! Rank '+L.rank+'.');},
  'body-del':function(el){S.body=S.body.filter(function(x){return x.d!==el.dataset.v;});save();syncAvatar();render();},
  'wipe':function(){confirmM('Apagar todos os meus dados','Treinos, histórico, rotinas, exercícios criados e registros de peso serão apagados da sua conta. Não dá para desfazer.','Apagar tudo',function(){var st=S.settings;S=blank();S.settings=st;S.pendingWipe=true;rest=null;save();flushPosts();render();toast('Dados apagados.');},true);},
