@@ -399,6 +399,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .dsum span{color:var(--muted);font-size:14px}
 .dsum b{font-size:18px}
 .mbar .xpbar{margin-top:6px}
+.fbig{font:700 36px/1.1 var(--mono);color:var(--accent)}
 .ditem{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--line);padding:10px 0;min-height:52px;color:inherit}
 .ditem:first-child{border-top:0}
 .ditem .dname{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1993,6 +1994,8 @@ function nut(){
   if(!n.days||typeof n.days!=='object')n.days={};
   if(!Array.isArray(n.mine))n.mine=[];
   if(!Array.isArray(n.recent))n.recent=[];
+  if(!n.fast||typeof n.fast!=='object')n.fast={start:null,h:16,hist:[]};
+  if(!Array.isArray(n.fast.hist))n.fast.hist=[];
   return n;
 }
 function nGoal(){var g=nut().goal;return g&&g.kcal>0?g:DT.defaultGoal();}
@@ -2023,6 +2026,7 @@ function vDieta(){
     var its=r.items.filter(function(x){return x.m===i;}),t=DT.sum(its),goal=Math.round(g.kcal*((g.meals||DT.MEAL_PCT)[i]||0)/100);
     h+='<section class="sec" aria-label="'+esc(name)+'"><div class="sh"><h2 style="font-size:19px">'+esc(name)+'</h2><span class="mono note">'+num(t.k,0)+' / '+num(goal,0)+' kcal</span></div><div class="card" style="padding:4px 16px">'+its.map(function(x){return '<button class="ditem" data-act="d-item" data-id="'+esc(x.id)+'"><span style="min-width:0"><b class="dname">'+esc(x.n)+'</b><small>'+gFmt(x.g)+' g · P '+gFmt(x.p)+' · C '+gFmt(x.c)+' · G '+gFmt(x.f)+'</small></span><b class="mono">'+num(x.k,0)+'</b></button>';}).join('')+'<button class="btn ghost block" style="margin:10px 0" data-act="d-add" data-m="'+i+'">+ Adicionar alimento</button></div></section>';
   });
+  h+=dWater(d)+dWeight(d)+dFast();
   h+='<p class="note" style="margin-top:22px">Valores aproximados: confira a embalagem quando precisar de precisão. Não substitui orientação de nutricionista. Produtos: dados do Open Food Facts (licença ODbL); alimentos básicos na linha da tabela TACO.</p></div>';
   return h;
 }
@@ -2182,6 +2186,68 @@ function nExEdit(){
       nDay(d).ex=Math.round(n);save();popModal();render();return true;
     }});
 }
+
+/* ---- Fase 2: água, peso e jejum ---- */
+function dWater(d){
+  var w=((S.daily&&S.daily[d])||{}).w||0,goal=waterGoal(),pct=Math.min(100,Math.round(w/goal*100));
+  function L(ml){return num(ml/1000,ml%1000?2:0)+' L';}
+  return '<section class="sec" aria-label="Água"><div class="sh"><h2 style="font-size:19px">Água</h2><span class="mono note">'+L(w)+' / '+L(goal)+'</span></div><div class="card"><div class="xpbar" role="progressbar" aria-label="Água do dia" aria-valuemin="0" aria-valuemax="'+goal+'" aria-valuenow="'+w+'"><i style="width:'+pct+'%;background:linear-gradient(90deg,#3fb8ff,#7fd3ff)"></i></div><div class="row" style="margin-top:12px"><button class="btn sm" data-act="d-water" data-v="250">+ 250 ml</button><button class="btn sm" data-act="d-water" data-v="500">+ 500 ml</button>'+(w?'<button class="btn sm ghost" data-act="d-water" data-v="-250" aria-label="Desfazer 250 ml">− 250</button>':'')+'</div><p class="note" style="margin-top:8px">Meta calculada pelo seu peso. Conta também na missão diária.</p></div></section>';
+}
+function dWeight(d){
+  var b=S.body.filter(function(x){return x.kg>0;}).sort(function(a,c){return a.d<c.d?-1:1;}),
+      day=b.filter(function(x){return x.d===d;})[0],
+      prior=b.filter(function(x){return x.d<=d;}),last=prior[prior.length-1],before=prior[prior.length-2],
+      pts=prior.slice(-12).map(function(x){return {l:x.d.slice(8)+'/'+x.d.slice(5,7),v:conv(x.kg)};}),
+      info='';
+  if(last){
+    info='Último registro: <b>'+esc(fmtW(last.kg))+'</b> em '+new Date(last.d+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+    if(before){var df=conv(last.kg)-conv(before.kg);info+=' · '+(df>0?'+':df<0?'−':'')+num(Math.abs(df),1)+' '+unit()+' desde o anterior';}
+  }else info='Nenhum peso registrado ainda.';
+  return '<section class="sec" aria-label="Peso e medidas"><div class="sh"><h2 style="font-size:19px">Peso e medidas</h2></div><div class="card"><p class="note" style="margin-bottom:10px">'+info+'</p>'+(day?'<p class="note" style="margin-bottom:10px">Neste dia você registrou '+esc(fmtW(day.kg))+'.</p>':'')+'<div class="row" style="flex-wrap:nowrap"><input id="dw" inputmode="decimal" autocomplete="off" placeholder="Peso ('+unit()+')" aria-label="Peso em '+unit()+'" value="" style="max-width:150px"><button class="btn sm primary" data-act="d-weight">Registrar peso</button></div>'+(pts.length>1?'<div style="margin-top:14px">'+lineChart(pts,function(v){return num(v,1);})+'</div>':'')+'<div class="row" style="margin-top:12px"><button class="btn sm" data-act="d-body">Medidas completas (cintura, braço…)</button></div><p class="note" style="margin-top:8px">Pese-se uma vez por semana, no mesmo horário. O peso e as medidas também mudam o corpo do seu avatar.</p></div></section>';
+}
+function fastCfg(){var f=nut().fast;if(!(f.h>=8&&f.h<=24))f.h=16;return f;}
+function fastEnd(f){return new Date(f.start+f.h*3600000).toLocaleString('pt-BR',{weekday:'short',hour:'2-digit',minute:'2-digit'});}
+function dFast(){
+  var f=fastCfg(),active=f.start>0,el=active?Math.max(0,Math.floor((Date.now()-f.start)/1000)):0,goal=f.h*3600,pct=Math.min(100,Math.round(el/goal*100)),done=active&&el>=goal;
+  var h='<section class="sec" aria-label="Jejum intermitente"><div class="sh"><h2 style="font-size:19px">Jejum intermitente</h2>'+(active?'<span class="mono note">Meta: '+f.h+' h</span>':'')+'</div><div class="card">';
+  if(active){
+    h+='<div class="fbig mono" id="fclock" aria-live="off">'+clock(el)+'</div><div class="xpbar" role="progressbar" aria-label="Progresso do jejum" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'" style="margin:8px 0"><i id="fbar" style="width:'+pct+'%"></i></div><p class="note" id="fnote">'+(done?'<span style="color:var(--good)">Meta de '+f.h+' h atingida.</span> Você pode encerrar quando quiser.':'Termina por volta de '+esc(fastEnd(f))+'.')+'</p><div class="row" style="margin-top:12px"><button class="btn danger sm" data-act="f-end">Encerrar jejum</button></div>';
+  }else{
+    h+='<div class="lbl" style="margin-bottom:6px">Duração do jejum</div><div class="seg" role="group" aria-label="Duração do jejum">'+[12,14,16,18,20].map(function(n){return '<button class="'+(f.h===n?'on':'')+'" data-act="f-h" data-v="'+n+'" aria-pressed="'+(f.h===n)+'">'+n+' h</button>';}).join('')+'</div><div class="row" style="margin-top:12px"><button class="btn primary" data-act="f-start">Iniciar jejum de '+f.h+' h</button></div>';
+  }
+  if(f.hist.length)h+='<div style="margin-top:14px"><div class="lbl" style="margin-bottom:4px">Últimos jejuns</div>'+f.hist.slice(0,5).map(function(x){var ok=(x.e-x.s)>=x.h*3600000;return '<div class="pr"><span>'+new Date(x.s).toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'})+'<br><small class="note">'+fmtDur((x.e-x.s)/1000)+' de '+x.h+' h</small></span><span class="mono" style="color:'+(ok?'var(--good)':'var(--muted)')+'">'+(ok?'Meta ✓':'Antes da meta')+'</span></div>';}).join('')+'</div>';
+  h+='<p class="note" style="margin-top:12px">Jejum não é indicado para menores de 18 anos, gestantes, quem tem diabetes ou usa medicação, nem para quem já teve ou tem transtorno alimentar. Na dúvida, fale com um profissional de saúde. Pare se passar mal.</p></div></section>';
+  return h;
+}
+setInterval(function(){
+  if(!user||ui.view!=='dieta'||!S.nutri||!S.nutri.fast||!(S.nutri.fast.start>0))return;
+  var f=S.nutri.fast,el=Math.max(0,Math.floor((Date.now()-f.start)/1000)),goal=f.h*3600,c=$('#fclock');
+  if(!c)return;
+  c.textContent=clock(el);
+  var b=$('#fbar');if(b)b.style.width=Math.min(100,Math.round(el/goal*100))+'%';
+  if(el>=goal){var n=$('#fnote');if(n&&!n.dataset.done){n.dataset.done='1';n.innerHTML='<span style="color:var(--good)">Meta de '+f.h+' h atingida.</span> Você pode encerrar quando quiser.';try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}}}
+},500);
+
+Object.assign(ACT,{
+ 'd-water':function(el){var r=dayRec(dDay());r.w=Math.max(0,(r.w||0)+(+el.dataset.v));trimDaily();save();render();},
+ 'd-weight':function(){
+   var inp=$('#dw'),kg=inp?toKg(inp.value):null;
+   if(!(kg>0)){toast('Informe o peso.');return;}
+   if(kg<25||kg>350){toast('Peso: confira o valor.');return;}
+   var d=dDay(),old=S.body.filter(function(x){return x.d===d;})[0]||{};
+   S.body=S.body.filter(function(x){return x.d!==d;});S.body.push(Object.assign({},old,{d:d,kg:kg}));
+   save();syncAvatar();render();toast('Peso registrado.');
+ },
+ 'd-body':function(){ui.ptab='body';go('perfil');},
+ 'f-h':function(el){var f=fastCfg();if(f.start>0)return;f.h=+el.dataset.v;save();render();},
+ 'f-start':function(){var f=fastCfg();if(f.start>0)return;f.start=Date.now();save();render();toast('Jejum iniciado. Beba água.');},
+ 'f-end':function(){
+   var f=fastCfg();if(!(f.start>0))return;
+   var finish=function(){f.hist.unshift({s:f.start,e:Date.now(),h:f.h});f.hist=f.hist.slice(0,30);f.start=null;save();render();toast('Jejum encerrado.');};
+   var el=Date.now()-f.start;
+   if(el<f.h*3600000)confirmM('Encerrar jejum','Você está há '+fmtDur(el/1000)+' de '+f.h+' h. Encerrar agora?','Encerrar',finish,true);else finish();
+ }
+});
 
 Object.assign(ACT,{
  'd-prev':function(){ui.dd=dkOff(dDay(),-1);render();},
