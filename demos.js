@@ -944,5 +944,13 @@ function svg(id,t,cls){
 }
 function muscles(id){var m=MU[id];if(!m)return null;return {p:Object.keys(m.p).map(function(k){return MNAME[k];}),s:Object.keys(m.s).map(function(k){return MNAME[k];})};}
 function check(id){var d=D[id];if(!d)return null;var w=[];[0,0.5,1].forEach(function(t){var o=solvePose(lerpV(d.a,d.b,t));if(o.fk)checkFK(o).forEach(function(x){w.push('t='+t+': '+x);});});return {warn:w,frame:frameOf(d,id),box:poseBox(d)};}
-window.ENGEFIT_DEMOS={has:function(id){return !!D[id];},svg:svg,steps:function(id){return S[id]||null;},muscles:muscles,ids:Object.keys(D),check:check};
+/* Mapa do corpo (frente e costas) colorido por nível: lv[chave do músculo] = 1 (pouco) ou 2 (muito) */
+function bodyMap(lv){
+  var ms={p:{},s:{}};for(var k in lv){if(lv[k]>=2)ms.p[k]=1;else if(lv[k]>=1)ms.s[k]=1;}
+  var pose={front:1,sy:26,hy:60,arm:{ang:[10,10]},leg:{ang:4}};
+  function one(back){var defs=[],o=solveFront(pose);return {defs:defs,g:drawFront(o,ms,back,defs)};}
+  var fr=one(false),bk=one(true);
+  return '<svg class="bodymap" viewBox="0 -18 200 132" role="img" aria-label="Mapa dos músculos treinados, de frente e de costas"><defs>'+DEFS+fr.defs.join('')+bk.defs.join('')+'</defs><rect x="0" y="-18" width="200" height="132" fill="url(#dmBg)"/><g transform="translate(-30,0)">'+fr.g+'</g><g transform="translate(70,0)">'+bk.g+'</g><text x="50" y="-9" text-anchor="middle" fill="#8ea3c0" font-size="6" font-family="sans-serif">FRENTE</text><text x="150" y="-9" text-anchor="middle" fill="#8ea3c0" font-size="6" font-family="sans-serif">COSTAS</text></svg>';
+}
+window.ENGEFIT_DEMOS={has:function(id){return !!D[id];},svg:svg,steps:function(id){return S[id]||null;},muscles:muscles,ids:Object.keys(D),check:check,bodyMap:bodyMap,mus:function(id){var m=MU[id];return m?{p:Object.keys(m.p),s:Object.keys(m.s)}:null;}};
 })();
