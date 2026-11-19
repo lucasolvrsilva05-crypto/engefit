@@ -350,6 +350,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .ptr{display:block;width:100%;height:auto;border-radius:10px;user-select:none;-webkit-user-drag:none}.av .ptr{border-radius:50%;height:100%;object-fit:cover}
 .av.has{background:#07101f;border-color:rgba(63,184,255,.5);padding:0}
 .statuswin{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:18px;padding:14px 18px;margin-bottom:18px;align-items:center}
+.dungeon{border-color:color-mix(in srgb,var(--dg) 70%,transparent)!important;box-shadow:0 0 22px -8px var(--dg)}.dungeon .eyebrow{color:var(--dg)}
 .ptitle{margin:2px 0 0;font:600 13px/1.3 var(--display);letter-spacing:.04em;color:#ffd66b;text-shadow:0 0 10px rgba(255,204,51,.35)}.ptitle.sm{font-size:11.5px;margin:1px 0 0}
 .achstrip{margin-bottom:14px}.achstrip h3{margin:0}.achrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .medal{display:block;flex:none}.medal.on{filter:drop-shadow(0 0 6px rgba(63,184,255,.25))}
@@ -1240,7 +1241,7 @@ function refreshRelations(){
 function loadSocial(){
   soc.ok=false;
   function q(){return sb.from('profiles').select(pcols()).eq('id',user.id).maybeSingle();}
-  function fb(r){if(r.error&&!NOCQ&&/conq/i.test(r.error.message||'')){NOCQ=true;return q().then(fb);}if(r.error&&!NOXP&&/\b(xp|lv|rk)\b/i.test(r.error.message||'')){NOXP=true;return q().then(fb);}if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
+  function fb(r){if(r.error&&!NOWK&&/\b(wk|wxp|dg)\b/i.test(r.error.message||'')){NOWK=true;return q().then(fb);}if(r.error&&!NOCQ&&/conq/i.test(r.error.message||'')){NOCQ=true;return q().then(fb);}if(r.error&&!NOXP&&/\b(xp|lv|rk)\b/i.test(r.error.message||'')){NOXP=true;return q().then(fb);}if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
   return q().then(fb).then(function(r){
     if(r.error)throw r.error;
     soc.prof=r.data;soc.ok=true;
@@ -1335,9 +1336,9 @@ function personRow(p,extra){
 }
 
 /* Avatar do Sistema (masculino/feminino) e corpo pelas medidas */
-var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false,NOXP=false,NOCQ=false;
+var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false,NOXP=false,NOCQ=false,NOWK=false;
 var NOPN=false;
-function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no')+(NOXP?'':',xp,lv,rk')+(NOCQ?'':',conq');}
+function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no')+(NOXP?'':',xp,lv,rk')+(NOCQ?'':',conq')+(NOWK?'':',wk,wxp,dg');}
 // Avatar público de alguém com nível/XP/rank validados pelo servidor (colunas xp, lv, rk), quando existem.
 function srvAv(p){var a=Object.assign({},(p&&p.avatar)||{});if(p&&!NOXP&&p.lv!=null){a.lv=+p.lv;a.xp=+p.xp||0;a.rank=p.rk||rankOf(a.lv);}return a;}
 function pno(p){return p&&p.player_no?'Jogador #'+p.player_no:'';}
@@ -1573,7 +1574,7 @@ function missionsHTML(){
    Mesmas regras do servidor (supabase/conquistas.sql · engefit_avaliar): até 2 treinos por dia, carga até 500 kg,
    até 100 repetições. O servidor guarda a lista validada em profiles.conq; títulos de outros jogadores só
    aparecem se a conquista estiver nessa lista. */
-var ACH_G=['Treinos','Carga levantada','Recordes pessoais','Constância','Missões e Sistema','Rank','Horário e intensidade','Corpo e dieta'];
+var ACH_G=['Treinos','Carga levantada','Recordes pessoais','Constância','Missões e Sistema','Rank','Horário e intensidade','Corpo e dieta','Dungeons'];
 var ACH_C=['#9aa4b5','#3fb8ff','#a66bff','#ffcc33'],ACH_R=['Comum','Rara','Épica','Lendária'];
 // [id, grupo, nome, descrição, raridade, título, métrica, meta]
 var ACH=[
@@ -1608,11 +1609,14 @@ var ACH=[
  ['maratona',6,'Maratona de Séries','Fazer 30 séries ou mais num único treino.',1,'','maxsets',30],
  ['medida',7,'Autoconhecimento','Registrar a primeira medição corporal.',0,'','medida',1],
  ['transf',7,'Transformação','Mudar 5 kg na direção do seu objetivo desde a primeira pesagem.',2,'Transformado','delta',5],
- ['diario',7,'Diário em Dia','Anotar 3 refeições ou mais em 7 dias.',1,'','diario',7]
+ ['diario',7,'Diário em Dia','Anotar 3 refeições ou mais em 7 dias.',1,'','diario',7],
+ ['dg1',8,'Primeira Dungeon','Concluir uma dungeon semanal.',0,'','dg',1],
+ ['dg10',8,'Explorador','Concluir 10 dungeons semanais.',1,'Explorador de Dungeons','dg',10],
+ ['dg25',8,'Senhor das Dungeons','Concluir 25 dungeons semanais.',2,'Senhor das Dungeons','dg',25]
 ];
 var ACHM={};ACH.forEach(function(a){ACHM[a[0]]=a;});
 function achMetrics(){
-  var t=today(),M={wk:0,vol:0,pr:0,best:0,req:0,wa:0,st:0,ch:0,pen:0,lv:levelInfo().lv,madr:0,coru:0,maxsets:0,medida:0,delta:0,diario:0};
+  var t=today(),M={dg:dgWeeks().n,wk:0,vol:0,pr:0,best:0,req:0,wa:0,st:0,ch:0,pen:0,lv:levelInfo().lv,madr:0,coru:0,maxsets:0,medida:0,delta:0,diario:0};
   var per={};S.workouts.forEach(function(w){var k=dkey(w.start);if(k>t)return;(per[k]=per[k]||[]).push({w:w,n:wkStats(w).sets});});
   var list=[];Object.keys(per).forEach(function(k){per[k].sort(function(a,b){return b.n-a.n||a.w.start-b.w.start;}).slice(0,2).forEach(function(x){list.push(x);});});
   list.sort(function(a,b){return a.w.start-b.w.start;});
@@ -1654,7 +1658,7 @@ function titleOf(p,me){
 }
 function titleHTML(t,cls){return t?'<p class="ptitle'+(cls?' '+cls:'')+'">« '+esc(t)+' »</p>':'';}
 var ACH_ICON={0:'<path d="M15 24h18M12 19v10M16.5 17v14M31.5 17v14M36 19v10"/>',1:'<circle cx="24" cy="24" r="9"/><circle cx="24" cy="24" r="2.5"/>',2:'<path d="M24 34V14M16 22l8-8 8 8"/>',3:'<path d="M24 13c4 5 8 8 8 13a8 8 0 0 1-16 0c0-4 3-6 4-9 1 3 2 4 4 4-1-3-1-5 0-8z"/>',4:'<path d="M15 25l6 6 12-13"/>',
-  7:'<path d="M14 31h20M15 31v-4M19.5 31v-3M24 31v-4M28.5 31v-3M33 31v-4M17 22c2-6 12-6 14 0"/>',madrug:'<circle cx="24" cy="26" r="6"/><path d="M24 13v3M14 26h-3M37 26h-3M16.5 18.5l2 2M31.5 18.5l-2 2M12 34h24"/>',coruja:'<path d="M29 14a10 10 0 1 0 5 17 8 8 0 0 1-5-17z"/>',maratona:'<path d="M26 12l-9 14h7l-2 10 9-14h-7z"/>',diario:'<path d="M19 13v9a3 3 0 0 0 6 0v-9M22 13v23M29 13c3 2 3 9 0 11v12"/>'};
+  7:'<path d="M14 31h20M15 31v-4M19.5 31v-3M24 31v-4M28.5 31v-3M33 31v-4M17 22c2-6 12-6 14 0"/>',madrug:'<circle cx="24" cy="26" r="6"/><path d="M24 13v3M14 26h-3M37 26h-3M16.5 18.5l2 2M31.5 18.5l-2 2M12 34h24"/>',coruja:'<path d="M29 14a10 10 0 1 0 5 17 8 8 0 0 1-5-17z"/>',maratona:'<path d="M26 12l-9 14h7l-2 10 9-14h-7z"/>',8:'<path d="M14 36V22a10 10 0 0 1 20 0v14M14 36h20M20 36v-8a4 4 0 0 1 8 0v8"/>',diario:'<path d="M19 13v9a3 3 0 0 0 6 0v-9M22 13v23M29 13c3 2 3 9 0 11v12"/>'};
 function medal(id,on,big){
   var a=ACHM[id],col=on?ACH_C[a[4]]:'#4a5466',g=ACH_ICON[id]||ACH_ICON[a[1]],sz=big?56:40;
   var inner=a[1]===5?'<text x="24" y="31" text-anchor="middle" font-size="20" font-weight="700" fill="'+col+'" stroke="none" font-family="var(--display)">'+id.slice(1)+'</text>':g;
@@ -1705,24 +1709,78 @@ function achSync(){
 /* ---------- XP, nível e rank ---------- */
 function xpNeed(n){return 100+20*(n-1);}
 function rankOf(lv){return lv>=55?'S':lv>=35?'A':lv>=20?'B':lv>=10?'C':lv>=5?'D':'E';}
-function xpTotal(){
-  var x=0,days={};
-  var t=today(),per={};
-  S.workouts.forEach(function(w){var k=dkey(w.start);if(k>t)return;(per[k]=per[k]||[]).push(Math.min(100,40+2*wkStats(w).sets));});
-  Object.keys(per).forEach(function(k){per[k].sort(function(a,b){return b-a;}).slice(0,2).forEach(function(v){x+=v;});});
-  Object.keys(S.daily||{}).forEach(function(k){days[k]=1;});
-  Object.keys(days).forEach(function(k){
-    if(k>t)return;var e=dayEval(k),r=(S.daily&&S.daily[k])||{};
-    if(e.steps)x+=15;if(e.water)x+=15;if(e.req)x+=30;if(e.chal)x+=25;if((r.pc||[]).length>=4)x+=20;
+/* XP base (sem dungeon): por dia, e os números de cada semana para a dungeon.
+   Mesmas regras do servidor (supabase/dungeon.sql · engefit_avaliar). */
+var coreCache={k:'',v:null};
+function lvKey(){return S.workouts.length+'|'+JSON.stringify(S.workouts).length+'|'+JSON.stringify(S.daily||{}).length+'|'+JSON.stringify(S.settings.plan||{}).length+'|'+JSON.stringify(S.body).length+'|'+today();}
+function dgMon(dk){var dw=new Date(dk+'T12:00:00').getDay();return dkOff(dk,-((dw+6)%7));}
+function xpCore(){
+  var key=lvKey();if(coreCache.k===key)return coreCache.v;
+  var t=today(),dx={},wkm={},tot=0,per={};
+  function add(k,v){dx[k]=(dx[k]||0)+v;tot+=v;}
+  function wadd(k,f,v){var w=wkm[k]||(wkm[k]={});w[f]=(w[f]||0)+v;}
+  S.workouts.forEach(function(w){var k=dkey(w.start);if(k>t)return;(per[k]=per[k]||[]).push({w:w,n:wkStats(w).sets});});
+  Object.keys(per).forEach(function(k){per[k].sort(function(a,b){return b.n-a.n||a.w.start-b.w.start;}).slice(0,2).forEach(function(x){
+    var mk=dgMon(k),vo=0;add(k,Math.min(100,40+2*x.n));wadd(mk,'tr',1);wadd(mk,'se',x.n);
+    (x.w.exs||[]).forEach(function(e){(e.sets||[]).forEach(function(st){if(!st.done||st.t==='W')return;var kg=+st.kg||0,r=+st.reps||0;if(kg<=0||kg>500||r<=0||r>100)return;vo+=kg*r;});});
+    wadd(mk,'vo',vo);});});
+  Object.keys(S.daily||{}).forEach(function(k){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||k>t)return;var e=dayEval(k),r=S.daily[k]||{},mk=dgMon(k),st=+r.st||0;
+    if(st<=100000)wadd(mk,'ps',st);
+    if(e.steps)add(k,15);if(e.water){add(k,15);wadd(mk,'ag',1);}if(e.req){add(k,30);wadd(mk,'mi',1);}if(e.chal){add(k,25);wadd(mk,'ch',1);}if((r.pc||[]).length>=4)add(k,20);
   });
-  return x;
+  var v={dx:dx,wkm:wkm,total:tot};coreCache={k:key,v:v};return v;
 }
+function lvOf(x){var lv=1,rest=Math.max(0,x||0);while(rest>=xpNeed(lv)){rest-=xpNeed(lv);lv++;}return {lv:lv,cur:rest,need:xpNeed(lv),rank:rankOf(lv)};}
+
+/* ---------- Dungeon semanal ---------- */
+var DG_N=['Caverna dos Goblins','Masmorra de Gelo','Ninho das Aranhas','Fortaleza de Ferro','Templo Submerso','Cripta Sombria','Floresta dos Lobos','Vulcão Adormecido'];
+var DG_T={tr:[2,2,3,3,4,4],se:[30,40,50,60,80,100],vo:[3000,5000,8000,12000,16000,20000],ps:[30000,35000,40000,50000,60000,70000],ag:[3,3,4,4,5,5],ch:[2,2,3,3,4,5],mi:[3,3,4,4,5,6]};
+var DG_BONUS=150;
+function dgFor(mon,ri){
+  var wi=Math.round((new Date(mon+'T12:00:00')-new Date('2024-01-01T12:00:00'))/864e5/7),r=Math.max(0,Math.min(5,ri||0));
+  function md(a,b){return ((a%b)+b)%b;}
+  var ts=[['tr','se','vo'][md(wi,3)],['ps','ag'][md(Math.trunc(wi/3),2)],['ch','mi'][md(Math.trunc(wi/6),2)]];
+  return {n:md(wi,8),obj:ts.map(function(t){return {t:t,meta:DG_T[t][r]};})};
+}
+function dgLabel(o){var m=o.meta;return {tr:'Concluir '+m+' treinos',se:'Fazer '+m+' séries',vo:'Levantar '+m.toLocaleString('pt-BR')+' kg somando os treinos',ps:'Somar '+m.toLocaleString('pt-BR')+' passos',ag:'Bater a meta de água em '+m+' dias',ch:'Completar '+m+' desafios do Sistema',mi:'Completar a missão diária em '+m+' dias'}[o.t];}
+var dgCache={k:'',v:null};
+function dgWeeks(){
+  var c=xpCore();if(dgCache.k===coreCache.k)return dgCache.v;
+  var cur=dgMon(today()),bonus=0,n=0,curDone=false,days=Object.keys(c.dx).sort(),cw=null;
+  Object.keys(c.wkm).sort().forEach(function(mk){
+    var pre=bonus;days.forEach(function(d){if(d<mk)pre+=c.dx[d];});
+    var ri=RANKS.indexOf(lvOf(pre).rank),g=dgFor(mk,ri),w=c.wkm[mk],ok=g.obj.every(function(o){return (w[o.t]||0)>=o.meta;});
+    if(ok){bonus+=DG_BONUS;n++;if(mk===cur)curDone=true;}
+    if(mk===cur)cw={ri:ri};
+  });
+  var wxp=0;days.forEach(function(d){if(d>=cur)wxp+=c.dx[d];});if(curDone)wxp+=DG_BONUS;
+  var v={bonus:bonus,n:n,cur:cur,curDone:curDone,wxp:wxp,ri:cw?cw.ri:null};dgCache={k:coreCache.k,v:v};return v;
+}
+function dgNow(){
+  var W=dgWeeks(),c=xpCore(),mon=W.cur,ri=W.ri;
+  if(ri==null){var pre=W.bonus;Object.keys(c.dx).forEach(function(d){if(d<mon)pre+=c.dx[d];});ri=RANKS.indexOf(lvOf(pre).rank);}
+  var g=dgFor(mon,ri),w=c.wkm[mon]||{};
+  g.obj.forEach(function(o){o.v=w[o.t]||0;o.ok=o.v>=o.meta;});
+  var left=Math.round((new Date(dkOff(mon,6)+'T12:00:00')-new Date(today()+'T12:00:00'))/864e5);
+  return {mon:mon,name:DG_N[g.n],rank:RANKS[ri],obj:g.obj,done:W.curDone,left:left,wxp:W.wxp};
+}
+function dungeonHTML(){
+  var D=dgNow(),col=AV?AV.AURA[D.rank]:'#a66bff',nd=D.obj.filter(function(o){return o.ok;}).length;
+  var h='<section class="sys quest dungeon'+(D.done?' clear':'')+'" aria-labelledby="dgt" style="--dg:'+col+'"><div class="qhead"><p class="eyebrow">Dungeon da semana · Rank '+D.rank+'</p><h2 id="dgt">'+(D.done?'Dungeon conquistada':esc(D.name))+'</h2><span class="qcount mono">'+nd+'/3</span></div>';
+  if(D.done)h+='<p class="note" style="margin:0 0 10px">Você limpou a '+esc(D.name)+'. +'+DG_BONUS+' XP e a dungeon conta para as conquistas. Uma nova abre na segunda.</p>';
+  h+='<ul class="qlist">'+D.obj.map(function(o){var pct=Math.min(100,Math.round(o.v/o.meta*100)),val=(o.t==='vo'||o.t==='ps')?Math.round(o.v).toLocaleString('pt-BR')+' / '+o.meta.toLocaleString('pt-BR'):Math.min(o.v,o.meta)+' / '+o.meta;
+    return '<li class="q'+(o.ok?' ok':'')+'"><div class="qrow"><span class="qchk" aria-hidden="true">'+(o.ok?'✓':'')+'</span><span class="qt">'+esc(dgLabel(o))+'</span><span class="qv mono">'+val+'</span></div><div class="qbar" role="progressbar" aria-label="'+esc(dgLabel(o))+'" aria-valuemin="0" aria-valuemax="'+o.meta+'" aria-valuenow="'+Math.min(o.v,o.meta)+'"><i style="width:'+pct+'%"></i></div></li>';}).join('')+'</ul>';
+  h+='<p class="note" style="margin:10px 0 0">'+(D.done?'XP desta semana: '+D.wxp.toLocaleString('pt-BR')+'.':'Recompensa: +'+DG_BONUS+' XP. Termina no domingo às 23h59'+(D.left>0?' · falta'+(D.left===1?' 1 dia':'m '+D.left+' dias'):' · último dia!')+'.')+' <button class="linkbtn" data-act="gtab-week">Ranking da semana</button></p>';
+  return h+'</section>';
+}
+function xpTotal(){return xpCore().total+dgWeeks().bonus;}
 var lvCache={k:'',v:null};
 function levelInfo(){
-  var key=S.workouts.length+'|'+JSON.stringify(S.daily||{}).length+'|'+JSON.stringify(S.settings.plan||{}).length+'|'+today();
+  var key=lvKey();
   if(lvCache.k===key)return lvCache.v;
-  var x=xpTotal(),lv=1,rest=x;while(rest>=xpNeed(lv)){rest-=xpNeed(lv);lv++;}
-  var v={xp:x,lv:lv,cur:rest,need:xpNeed(lv),rank:rankOf(lv)};lvCache={k:key,v:v};return v;
+  var x=xpTotal(),L=lvOf(x);
+  var v={xp:x,lv:L.lv,cur:L.cur,need:L.need,rank:L.rank};lvCache={k:key,v:v};return v;
 }
 function streak(){
   var t=today(),n=0,since=S.settings.since||t,d=dayEval(t).req?t:dkOff(t,-1);
@@ -1820,7 +1878,8 @@ function vPessoas(){
   var h=ph('Comunidade ENGEFIT','Guilda')+'<div class="wrap">';
   if(!soc.prof)return h+'<div class="card"><p class="empty">Sem conexão com a comunidade agora. Tente de novo em instantes.</p></div></div>';
   var tab=ui.gtab||'pessoas';
-  h+='<div class="seg" role="tablist" style="margin-bottom:14px">'+[['pessoas','Pessoas'],['rank','Ranking geral']].map(function(x){return '<button role="tab" data-act="gtab" data-v="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'" aria-selected="'+(tab===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>';
+  h+='<div class="seg" role="tablist" style="margin-bottom:14px">'+[['pessoas','Pessoas'],['rank','Ranking geral'],['semana','Da semana']].map(function(x){return '<button role="tab" data-act="gtab" data-v="'+x[0]+'" class="'+(tab===x[0]?'on':'')+'" aria-selected="'+(tab===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>';
+  if(tab==='semana')return h+'<p class="note" style="margin:-4px 0 12px">XP ganho desde segunda-feira, com o bônus da dungeon. Zera toda segunda.</p><div id="rlist" class="stack"></div></div>';
   if(tab==='rank')return h+'<p class="note" style="margin:-4px 0 12px">Ordem: maior nível primeiro; no empate, quem tem mais XP.'+(NOXP?'':' O XP do ranking é conferido pelo Sistema a partir dos seus registros.')+'</p><div id="rlist" class="stack"></div></div>';
   return h+'<input type="search" id="pq" data-bind="pq" placeholder="Buscar por nome ou @usuário…" aria-label="Buscar pessoas" value="'+esc(ui.pq||'')+'"><div id="plist" class="stack" style="margin-top:14px"></div></div>';
 }
@@ -1830,18 +1889,22 @@ function loadRanking(){
   var g=++rgen;if(!el.innerHTML)el.innerHTML='<div class="spin" role="status" aria-label="Carregando"></div>';
   sb.from('profiles').select(pcols()).limit(1000).then(function(r){
     if(g!==rgen)return;if(r.error)throw r.error;
-    var me=pubAvatar(),rows=r.data.map(function(p){var a=srvAv(p);if(p.id===user.id){var mine=Object.assign({},me);if(!NOXP&&p.lv!=null){mine.lv=a.lv;mine.xp=a.xp;mine.rank=a.rank;}a=mine;}soc.people[p.id]=p;return {p:p,a:a,lv:+a.lv||1,xp:+a.xp||0};});
-    rows.sort(function(x,y){return y.lv-x.lv||y.xp-x.xp||pname(x.p).localeCompare(pname(y.p));});
+    var wk=ui.gtab==='semana',cur=dgMon(today()),W=dgWeeks();
+    var me=pubAvatar(),rows=r.data.map(function(p){var a=srvAv(p);if(p.id===user.id){var mine=Object.assign({},me);if(!NOXP&&p.lv!=null){mine.lv=a.lv;mine.xp=a.xp;mine.rank=a.rank;}a=mine;}soc.people[p.id]=p;
+      var w=(!NOWK&&p.wk!=null)?(p.wk===cur?+p.wxp||0:0):(p.id===user.id?W.wxp:0);
+      return {p:p,a:a,lv:+a.lv||1,xp:+a.xp||0,w:w};});
+    if(wk)rows=rows.filter(function(x){return x.w>0||x.p.id===user.id;});
+    rows.sort(wk?function(x,y){return y.w-x.w||y.lv-x.lv||pname(x.p).localeCompare(pname(y.p));}:function(x,y){return y.lv-x.lv||y.xp-x.xp||pname(x.p).localeCompare(pname(y.p));});
     var mine=-1;rows.forEach(function(x,i){if(x.p.id===user.id)mine=i;});
     function row(x,i){var rk=x.a.rank||rankOf(x.lv),col=AV?AV.AURA[rk]:'#9aa4b5',me2=x.p.id===user.id;
-      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+(x.p.player_no?' · #'+x.p.player_no:'')+'</small>'+titleHTML(titleOf(x.p,me2),'sm')+'</div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span><b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small></span></div></div>';}
+      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+(x.p.player_no?' · #'+x.p.player_no:'')+'</small>'+titleHTML(titleOf(x.p,me2),'sm')+'</div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span>'+(wk?'<b class="mono">+'+x.w.toLocaleString('pt-BR')+'</b><small class="mono">XP na semana</small>':'<b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small>')+'</span></div></div>';}
     var h=rows.slice(0,50).map(row).join('');
     if(mine>=50)h+='<p class="note" style="text-align:center">…</p>'+row(rows[mine],mine);
-    el.innerHTML=h||'<p class="empty">Ainda não há jogadores no ranking.</p>';
+    el.innerHTML=h||'<p class="empty">'+(wk?'Ninguém pontuou nesta semana ainda. Seja o primeiro!':'Ainda não há jogadores no ranking.')+'</p>';
   }).catch(function(){if(g===rgen)el.innerHTML='<p class="empty">Não deu para carregar o ranking. Verifique sua conexão.</p>';});
 }
 function loadPeopleList(){
-  if(ui.gtab==='rank'){loadRanking();return;}
+  if(ui.gtab==='rank'||ui.gtab==='semana'){loadRanking();return;}
   var el=$('#plist');if(!el||!soc.prof)return;
   var g=++pgen,q=(ui.pq||'').trim().replace(/^@/,''),qq=q.replace(/[^\p{L}\p{N}_. ]/gu,'').slice(0,30);
   if(!el.innerHTML)el.innerHTML='<div class="spin" role="status" aria-label="Carregando"></div>';
@@ -2073,7 +2136,7 @@ function vInicio(){
   var h=ph(hoje,'Olá, '+(S.settings.name||'Atleta'))+'<div class="wrap">';
   if(rc.on&&!rc.has&&S.settings.goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px;gap:12px"><div><b>Proteja sua conta</b><p class="note">Sem e-mail, o código de recuperação é o que salva sua conta se você esquecer a senha.</p></div><button class="btn sm primary" data-act="rc-new">Gerar código</button></div>';
   if(!S.settings.goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px"><div><b>Complete seu cadastro no Sistema</b><p class="note">Escolha avatar e objetivo para receber missões sob medida.</p></div><button class="btn sm primary" data-act="onb-open">Continuar</button></div>';
-  h+=heroHTML()+missionsHTML()+planHTML();
+  h+=heroHTML()+missionsHTML()+dungeonHTML()+planHTML();
   h+='<div class="tiles"><div class="tile"><span class="lbl">Treinos · 7 dias</span><b>'+ws.length+'</b></div><div class="tile"><span class="lbl">Volume · 7 dias</span><b>'+fmtVol(v)+'</b></div><div class="tile"><span class="lbl">Séries · 7 dias</span><b>'+n+'</b></div></div>';
   h+='<div class="card row" style="margin-top:14px;justify-content:space-between">'+(S.active?'<div><b>Treino em andamento</b><p class="note">'+esc(S.active.name)+'</p></div><a class="btn primary" href="#treino">Retomar</a>':'<div><b>Pronto para treinar?</b><p class="note">Comece vazio ou escolha um dos seus treinos.</p></div><span class="row"><button class="btn primary" data-act="start-empty">Iniciar treino vazio</button><a class="btn" href="#treino">Meus treinos</a></span>')+'</div>';
   h+='<section class="sec"><div class="sh"><h2>Feed</h2><a class="btn sm" href="#pessoas">Encontrar pessoas</a></div><div id="feed" class="stack">'+feedHTML()+'</div></section></div>';
@@ -2306,7 +2369,7 @@ var NAV=[
 ['perfil','Status','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>']
 ];
 function buildNav(){var h=NAV.map(function(n){return '<a href="#'+n[0]+'" data-nav="'+n[0]+'">'+n[2]+'<span>'+n[1]+'</span></a>';}).join('');$('#navside').innerHTML=h;$('#navtabs').innerHTML=h;}
-function route(){var h=location.hash.slice(1),sub='';if(h.indexOf('/')>-1){sub=h.split('/')[1];h=h.split('/')[0];}ui.view=['inicio','treino','dieta','exercicios','pessoas','perfil'].indexOf(h)>-1?h:'inicio';if(h==='pessoas')ui.gtab=sub==='ranking'?'rank':'pessoas';}
+function route(){var h=location.hash.slice(1),sub='';if(h.indexOf('/')>-1){sub=h.split('/')[1];h=h.split('/')[0];}ui.view=['inicio','treino','dieta','exercicios','pessoas','perfil'].indexOf(h)>-1?h:'inicio';if(h==='pessoas')ui.gtab=sub==='ranking'?'rank':sub==='semana'?'semana':'pessoas';}
 function go(v){if(location.hash==='#'+v){route();render();}else location.hash=v;}
 function drawMini(){
   var el=$('#mini');
@@ -2417,7 +2480,8 @@ var ACT={
  'water':function(el){var r=dayRec(today());r.w=Math.max(0,(r.w||0)+(+el.dataset.v));trimDaily();save();render();},
  'steps-save':function(){var v=parseInt(String($('#qsteps').value).replace(/\D/g,''),10);if(isNaN(v)||v<0||v>100000){toast('Passos: confira o valor.');return;}dayRec(today()).st=v;trimDaily();save();render();toast('Passos salvos.');},
  'plan-gen':function(){planGen();},
- 'gtab':function(el){ui.gtab=el.dataset.v;try{history.replaceState(null,'','#pessoas'+(ui.gtab==='rank'?'/ranking':''));}catch(e){}render();},
+ 'gtab-week':function(){ui.gtab='semana';location.hash='pessoas/semana';},
+ 'gtab':function(el){ui.gtab=el.dataset.v;try{history.replaceState(null,'','#pessoas'+(ui.gtab==='rank'?'/ranking':ui.gtab==='semana'?'/semana':''));}catch(e){}render();},
  'chal':function(el){var r=dayRec(today()),k=el.dataset.p==='1'?'pc':'ch',i=+el.dataset.v;r[k]=r[k]||[];var j=r[k].indexOf(i);if(j>-1)r[k].splice(j,1);else r[k].push(i);if(k==='pc'&&r.pc.length>=4)r.pd=1;trimDaily();var before=levelInfo().lv;save();render();var L=levelInfo();if(L.lv>before)toast('Nível '+L.lv+'! Rank '+L.rank+'.');},
  'body-del':function(el){S.body=S.body.filter(function(x){return x.d!==el.dataset.v;});save();syncAvatar();render();},
  'wipe':function(){confirmM('Apagar todos os meus dados','Treinos, histórico, rotinas, exercícios criados e registros de peso serão apagados da sua conta. Não dá para desfazer.','Apagar tudo',function(){var st=S.settings;S=blank();S.settings=st;S.pendingWipe=true;rest=null;save();flushPosts();render();toast('Dados apagados.');},true);},
