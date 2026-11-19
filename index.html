@@ -1195,6 +1195,7 @@ function dayRec(d){S.daily=S.daily||{};return S.daily[d]||(S.daily[d]={});}
 function waterGoal(){var kg=myMeasures().peso;var ml=kg>0?kg*35:2000;return Math.max(1500,Math.min(4000,Math.round(ml/250)*250));}
 function stepsGoal(){return {emagrecer:10000,condicionamento:9000,saude:8000,massa:7000,forca:7000}[myGoal()]||8000;}
 function todaysWorkouts(){var d=today();return S.workouts.filter(function(w){return dkey(w.start)===d;});}
+function stepsK(d){var r=(S.daily&&S.daily[d])||{};if(!r.sk||!(r.st>0))return 0;var kg=myMeasures().peso;return Math.round(r.st*(kg>0?kg:70)*0.0005);}
 function trimDaily(){var ks=Object.keys(S.daily||{}).sort();while(ks.length>120)delete S.daily[ks.shift()];}
 
 /* ---------- Plano de treino automático ---------- */
@@ -1310,6 +1311,10 @@ function missions(){
   if(ev.train)list.push({id:'train',t:'Treino de hoje: '+ev.rt.name,v:ev.trained?1:0,goal:1,req:1,rid:ev.rt.id});
   list.push({id:'steps',t:'Caminhar '+stepsGoal().toLocaleString('pt-BR')+' passos',v:r.st||0,goal:stepsGoal(),req:1});
   list.push({id:'water',t:'Beber '+num(waterGoal()/1000,waterGoal()%1000?2:0)+' L de água',v:r.w||0,goal:waterGoal(),req:1});
+  if(DT){var dr=nRead(d),ml={};dr.items.forEach(function(x){ml[x.m]=1;});var nm=Object.keys(ml).length;
+    list.push({id:'diary',t:'Registrar as refeições do dia',v:Math.min(nm,3),goal:3,req:0,note:'Bônus: anote pelo menos 3 refeições na aba Dieta.'});
+    if(nut().goal){var gg=nGoal(),bud=gg.kcal+(dr.ex||0)+stepsK(d),tk=DT.sum(dr.items).k;
+      list.push({id:'kcal',t:'Ficar dentro da meta de calorias',v:(nm>=3&&tk>=gg.kcal*0.85&&tk<=bud*1.05)?1:0,goal:1,req:0,note:'Bônus: com 3 refeições ou mais, entre 85% da meta e 105% do que você pode comer hoje.'});}}
   if(!ev.train&&!(S.settings.plan&&S.settings.plan.map))list.push({id:'train0',t:'Treinar hoje (bônus)',v:ev.trained?1:0,goal:1,req:0,note:'Crie um plano para o Sistema saber seus dias de treino e de descanso.'});
   list.forEach(function(m){m.done=m.v>=m.goal;});
   return list;
@@ -1328,6 +1333,7 @@ function missionsHTML(){
     var pct=Math.min(100,Math.round(m.v/m.goal*100)),val='';
     if(m.id==='steps')val=(m.v||0).toLocaleString('pt-BR')+' / '+m.goal.toLocaleString('pt-BR');
     else if(m.id==='water')val=num(m.v/1000,m.v%1000?2:0)+' / '+num(m.goal/1000,m.goal%1000?2:0)+' L';
+    else if(m.id==='diary')val=m.v+' / '+m.goal+' refeições';
     else val=m.done?'Feito':'Pendente';
     h+='<li class="q'+(m.done?' ok':'')+'"><div class="qrow"><span class="qchk" aria-hidden="true">'+(m.done?'✓':'')+'</span><span class="qt">'+esc(m.t)+'</span><span class="qv mono">'+val+'</span></div>';
     if(m.goal>1)h+='<div class="qbar" role="progressbar" aria-label="'+esc(m.t)+'" aria-valuemin="0" aria-valuemax="'+m.goal+'" aria-valuenow="'+m.v+'"><i style="width:'+pct+'%"></i></div>';
@@ -2024,7 +2030,7 @@ function dBar(lbl,v,goal,col){
 function vDieta(){
   var h=ph('Diário alimentar','Dieta')+'<div class="wrap">';
   if(!DT)return h+'<div class="card"><p class="empty">Não foi possível carregar a Dieta. Atualize a página.</p></div></div>';
-  var d=dDay(),r=nRead(d),g=nGoal(),T=DT.sum(r.items),mg=DT.macroGrams(g.kcal,g.c,g.f,g.p),ex=r.ex||0,left=g.kcal-T.k+ex;
+  var d=dDay(),r=nRead(d),g=nGoal(),T=DT.sum(r.items),mg=DT.macroGrams(g.kcal,g.c,g.f,g.p),ex=(r.ex||0)+stepsK(d),left=g.kcal-T.k+ex;
   h+='<div class="row dnav" style="justify-content:space-between;flex-wrap:nowrap;margin-bottom:14px"><button class="btn sm" data-act="d-prev" aria-label="Dia anterior">‹</button><button class="btn ghost sm" data-act="d-today" aria-label="Voltar para hoje"><b>'+esc(dLabel(d))+'</b></button><button class="btn sm" data-act="d-next" aria-label="Próximo dia"'+(d>=today()?' disabled style="opacity:.4"':'')+'>›</button></div>';
   if(!nut().goal)h+='<div class="card row" style="justify-content:space-between;margin-bottom:14px"><div><b>Defina suas metas</b><p class="note">Calorias e macros do dia. Até lá usamos 2000 kcal (50% carboidratos, 30% gorduras, 20% proteínas).</p></div><button class="btn sm primary" data-act="d-goals">Definir metas</button></div>';
   h+='<section class="sys" aria-label="Resumo do dia" style="padding:16px"><div class="row" style="flex-wrap:nowrap;gap:16px;align-items:center">'+dRing(T.k,g.kcal+ex,left)+'<div class="stack" style="gap:8px;flex:1;min-width:0"><div class="dsum"><span>Meta</span><b class="mono">'+num(g.kcal,0)+'</b></div><div class="dsum"><span>Alimentos</span><b class="mono">'+num(T.k,0)+'</b></div><div class="dsum"><span>Exercícios</span><b class="mono">'+num(ex,0)+'</b></div></div></div><p class="note" style="margin:10px 0 12px">Restantes = Meta − Alimentos + Exercícios</p><div class="stack" style="gap:10px">'+dBar('Carboidratos',T.c,mg.c,'var(--accent)')+dBar('Gorduras',T.f,mg.f,'#a78bfa')+dBar('Proteínas',T.p,mg.p,'var(--good)')+'</div>'+dMicro(T,g)+'<div class="row" style="margin-top:14px"><button class="btn sm" data-act="d-goals">Metas</button><button class="btn sm" data-act="d-ex">Exercícios (kcal)</button>'+(!r.items.length&&nRead(dkOff(d,-1)).items.length?'<button class="btn sm" data-act="d-copy">Copiar de ontem</button>':'')+'</div></section>';
@@ -2032,7 +2038,7 @@ function vDieta(){
     var its=r.items.filter(function(x){return x.m===i;}),t=DT.sum(its),goal=Math.round(g.kcal*((g.meals||DT.MEAL_PCT)[i]||0)/100);
     h+='<section class="sec" aria-label="'+esc(name)+'"><div class="sh"><h2 style="font-size:19px">'+esc(name)+'</h2><span class="mono note">'+num(t.k,0)+' / '+num(goal,0)+' kcal</span></div><div class="card" style="padding:4px 16px">'+its.map(function(x){return '<button class="ditem" data-act="d-item" data-id="'+esc(x.id)+'"><span style="min-width:0"><b class="dname">'+esc(x.n)+'</b><small>'+gFmt(x.g)+' g · P '+gFmt(x.p)+' · C '+gFmt(x.c)+' · G '+gFmt(x.f)+'</small></span><b class="mono">'+num(x.k,0)+'</b></button>';}).join('')+'<button class="btn ghost block" style="margin:10px 0" data-act="d-add" data-m="'+i+'">+ Adicionar alimento</button></div></section>';
   });
-  h+=dWater(d)+dWeight(d)+dFast();
+  h+=dWater(d)+dSteps(d)+dWeight(d)+dFast();
   h+='<p class="note" style="margin-top:22px">Valores aproximados: confira a embalagem quando precisar de precisão. Não substitui orientação de nutricionista. Produtos: dados do Open Food Facts (licença ODbL); alimentos básicos na linha da tabela TACO.</p></div>';
   return h;
 }
@@ -2210,6 +2216,10 @@ function dWater(d){
   function L(ml){return num(ml/1000,ml%1000?2:0)+' L';}
   return '<section class="sec" aria-label="Água"><div class="sh"><h2 style="font-size:19px">Água</h2><span class="mono note">'+L(w)+' / '+L(goal)+'</span></div><div class="card"><div class="xpbar" role="progressbar" aria-label="Água do dia" aria-valuemin="0" aria-valuemax="'+goal+'" aria-valuenow="'+w+'"><i style="width:'+pct+'%;background:linear-gradient(90deg,#3fb8ff,#7fd3ff)"></i></div><div class="row" style="margin-top:12px"><button class="btn sm" data-act="d-water" data-v="250">+ 250 ml</button><button class="btn sm" data-act="d-water" data-v="500">+ 500 ml</button>'+(w?'<button class="btn sm ghost" data-act="d-water" data-v="-250" aria-label="Desfazer 250 ml">− 250</button>':'')+'</div><p class="note" style="margin-top:8px">Meta calculada pelo seu peso. Conta também na missão diária.</p></div></section>';
 }
+function dSteps(d){
+  var r=(S.daily&&S.daily[d])||{},st=r.st||0,goal=stepsGoal(),pct=Math.min(100,Math.round(st/goal*100)),kg=myMeasures().peso,kc=Math.round(st*(kg>0?kg:70)*0.0005);
+  return '<section class="sec" aria-label="Passos"><div class="sh"><h2 style="font-size:19px">Passos</h2><span class="mono note">'+st.toLocaleString('pt-BR')+' / '+goal.toLocaleString('pt-BR')+'</span></div><div class="card"><div class="xpbar" role="progressbar" aria-label="Passos do dia" aria-valuemin="0" aria-valuemax="'+goal+'" aria-valuenow="'+st+'"><i style="width:'+pct+'%"></i></div><div class="row" style="margin-top:12px;flex-wrap:nowrap"><input id="dst" inputmode="numeric" autocomplete="off" placeholder="Passos do dia" aria-label="Passos do dia" value="'+(st||'')+'" style="max-width:150px"><button class="btn sm primary" data-act="d-steps">Salvar passos</button></div>'+(st>0?'<p class="note" style="margin-top:10px">Gasto estimado: cerca de <b>'+num(kc,0)+' kcal</b>'+(kg>0?'':' (usando 70 kg; registre seu peso para melhorar)')+'.</p><label class="chkrow" style="margin-top:6px"><input type="checkbox" id="dsk" data-act="d-stepk"'+(r.sk?' checked':'')+'><span>Somar esses passos ao anel de calorias</span></label>':'')+'<p class="note" style="margin-top:8px">Copie do Mi Fitness (ou do app do seu relógio). É uma estimativa: se você já lançou uma caminhada em Exercícios, não some de novo. Conta também na missão diária.</p></div></section>';
+}
 function dWeight(d){
   var b=S.body.filter(function(x){return x.kg>0;}).sort(function(a,c){return a.d<c.d?-1:1;}),
       day=b.filter(function(x){return x.d===d;})[0],
@@ -2246,6 +2256,8 @@ setInterval(function(){
 },500);
 
 Object.assign(ACT,{
+ 'd-steps':function(){var v=parseInt(String($('#dst').value).replace(/\D/g,''),10);if(isNaN(v)||v<0||v>100000){toast('Passos: confira o valor.');return;}dayRec(dDay()).st=v;trimDaily();save();render();toast('Passos salvos.');},
+ 'd-stepk':function(el){dayRec(dDay()).sk=el.checked?1:0;save();render();},
  'd-water':function(el){var r=dayRec(dDay());r.w=Math.max(0,(r.w||0)+(+el.dataset.v));trimDaily();save();render();},
  'd-weight':function(){
    var inp=$('#dw'),kg=inp?toKg(inp.value):null;
