@@ -346,7 +346,8 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .btn:hover{border-color:var(--accent)}
 .tabs a.on{color:var(--accent);text-shadow:0 0 12px rgba(63,184,255,.6)}
 .ph h1{text-shadow:0 0 22px rgba(63,184,255,.25)}
-.av{overflow:hidden}.av svg{width:100%;height:100%;display:block}
+.av{overflow:hidden}.av svg,.av img{width:100%;height:100%;display:block}
+.ptr{display:block;width:100%;height:auto;border-radius:10px;user-select:none;-webkit-user-drag:none}.av .ptr{border-radius:50%;height:100%;object-fit:cover}
 .av.has{background:#07101f;border-color:rgba(63,184,255,.5);padding:0}
 .statuswin{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:18px;padding:14px 18px;margin-bottom:18px;align-items:center}
 .statuswin .avfull svg{width:100%;height:auto;display:block}
@@ -459,6 +460,7 @@ body:not(.authmode) #install{margin-left:var(--side)}
 <script src="/exart.js"></script>
 <script src="/demos.js"></script>
 <script src="/avatar.js"></script>
+<script src="/portrait.js"></script>
 <script src="/taco.js"></script>
 <script src="/dieta.js"></script>
 <script src="/exercicios.js"></script>
@@ -1268,7 +1270,7 @@ function personRow(p,extra){
 }
 
 /* Avatar do Sistema (masculino/feminino) e corpo pelas medidas */
-var AV=window.ENGEFIT_AVATAR||null,NOAV=false;
+var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false;
 var NOPN=false;
 function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no');}
 function pno(p){return p&&p.player_no?'Jogador #'+p.player_no:'';}
@@ -1284,7 +1286,10 @@ function myAv(){var a=S.settings.avatar;return a&&a.g?a:null;}
 function myRank(){return S&&S.workouts?levelInfo().rank:'E';}
 function myShape(a){a=a||myAv()||{g:'m'};if(!AV||a.medidas===false)return {fat:0,mus:0,fonte:[]};return AV.shape(a.g,myMeasures());}
 function pubAvatar(){var a=myAv(),L=levelInfo(),o={rank:L.rank,lv:L.lv,xp:L.xp};if(!a)return o;o.g=a.g;o.skin=a.skin;o.hair=a.hair;if(a.medidas!==false){var sh=myShape(a);o.fat=sh.fat;o.mus=sh.mus;}return o;}
-function avSVG(a,view,label){if(!AV||!a||!a.g)return '';return AV.svg({g:a.g,skin:a.skin,hair:a.hair,rank:a.rank,fat:a.fat,mus:a.mus,view:view,label:label});}
+// Retrato (estilo manhwa) em toda parte; o corpo inteiro que acompanha as medidas fica só na tela de Medidas (view 'body').
+function avSVG(a,view,label){if(!a||!a.g)return '';
+  if(PT&&view!=='body')return PT.img({g:a.g,skin:a.skin,hair:a.hair},(AV&&AV.AURA[a.rank])||'#9aa4b5',view==='head'?'head':'bust',label);
+  if(!AV)return '';return AV.svg({g:a.g,skin:a.skin,hair:a.hair,rank:a.rank,fat:a.fat,mus:a.mus,view:view==='body'?'full':view,label:label});}
 function avHTML(p,me){
   var a=me?pubAvatar():(p&&p.avatar),nm=me?(S.settings.name||'A'):pname(p);
   if(a&&a.g&&AV)return '<span class="av has'+(me?' me':'')+'">'+avSVG(a,'head','Avatar de '+(nm||'pessoa'))+'</span>';
@@ -1317,8 +1322,8 @@ function avEdit(){
   pushModal({title:'Personalizar avatar',html:function(){
     return head('Personalizar avatar')+'<div class="avpick"><div class="sys prev">'+prev()+'</div><div>'+
       '<div class="lbl">Personagem</div><div class="seg" style="margin:7px 0 14px">'+[['m','Masculino'],['f','Feminino']].map(function(x){return '<button data-act="avd" data-k="g" data-v="'+x[0]+'" class="'+(d.g===x[0]?'on':'')+'" aria-pressed="'+(d.g===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
-      '<div class="lbl">Tom de pele</div><div class="swatches">'+SKN.map(function(x){var on=d.skin===x[0];return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.SKIN[x[0]][0]+'" data-act="avd" data-k="skin" data-v="'+x[0]+'" aria-label="Pele '+x[1]+'" aria-pressed="'+on+'"></button>';}).join('')+'</div>'+
-      '<div class="lbl">Cabelo</div><div class="swatches">'+Object.keys(AV.HAIR).map(function(k){var on=hair()===k;return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.HAIR[k][0]+'" data-act="avd" data-k="hair" data-v="'+k+'" aria-label="Cabelo '+k+'" aria-pressed="'+on+'" title="'+k+'"></button>';}).join('')+'</div>'+
+      '<div class="lbl">Tom de pele</div><div class="swatches">'+SKN.map(function(x){var on=d.skin===x[0];return '<button class="sw'+(on?' on':'')+'" style="background:'+(PT?PT.SKIN[x[0]][1]:AV.SKIN[x[0]][0])+'" data-act="avd" data-k="skin" data-v="'+x[0]+'" aria-label="Pele '+x[1]+'" aria-pressed="'+on+'"></button>';}).join('')+'</div>'+
+      '<div class="lbl">Cabelo</div><div class="swatches">'+Object.keys(AV.HAIR).map(function(k){var on=hair()===k;return '<button class="sw'+(on?' on':'')+'" style="background:'+(PT?PT.HAIR[k][1]:AV.HAIR[k][0])+'" data-act="avd" data-k="hair" data-v="'+k+'" aria-label="Cabelo '+k+'" aria-pressed="'+on+'" title="'+k+'"></button>';}).join('')+'</div>'+
       '<label class="chkrow" style="margin:0"><input type="checkbox" id="avmed" data-act="avd" data-k="medidas"'+(d.medidas?' checked':'')+'><span><b>Corpo pelas medidas</b><br><small>O corpo do avatar acompanha o que você registra com a fita métrica.</small></span></label>'+
       '</div></div><div class="row end"><button class="btn ghost" data-act="modal-close">Cancelar</button><button class="btn primary" data-act="av-save">Salvar avatar</button></div>';},
     act:function(x,el){
@@ -1560,8 +1565,8 @@ function drawOnboard(){
     var SKN=[['clara','clara'],['media','média'],['morena','morena'],['escura','escura']];
     h='<section class="sys onbcard"><p class="eyebrow">Passo 1 de 4 · Personagem</p><h1>Monte seu avatar</h1><div class="avpick"><div class="sys prev">'+avSVG({g:onb.g,skin:onb.skin,hair:onbHair(),rank:'E'},'full','Prévia do avatar')+'</div><div>'+
       '<div class="lbl">Personagem</div><div class="seg" style="margin:7px 0 14px">'+[['m','Masculino'],['f','Feminino']].map(function(x){return '<button data-act="onb-set" data-k="g" data-v="'+x[0]+'" class="'+(onb.g===x[0]?'on':'')+'" aria-pressed="'+(onb.g===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
-      '<div class="lbl">Tom de pele</div><div class="swatches">'+SKN.map(function(x){var on=onb.skin===x[0];return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.SKIN[x[0]][0]+'" data-act="onb-set" data-k="skin" data-v="'+x[0]+'" aria-label="Pele '+x[1]+'" aria-pressed="'+on+'"></button>';}).join('')+'</div>'+
-      '<div class="lbl">Cabelo</div><div class="swatches">'+Object.keys(AV.HAIR).map(function(k){var on=onbHair()===k;return '<button class="sw'+(on?' on':'')+'" style="background:'+AV.HAIR[k][0]+'" data-act="onb-set" data-k="hair" data-v="'+k+'" aria-label="Cabelo '+k+'" aria-pressed="'+on+'" title="'+k+'"></button>';}).join('')+'</div></div></div>'+
+      '<div class="lbl">Tom de pele</div><div class="swatches">'+SKN.map(function(x){var on=onb.skin===x[0];return '<button class="sw'+(on?' on':'')+'" style="background:'+(PT?PT.SKIN[x[0]][1]:AV.SKIN[x[0]][0])+'" data-act="onb-set" data-k="skin" data-v="'+x[0]+'" aria-label="Pele '+x[1]+'" aria-pressed="'+on+'"></button>';}).join('')+'</div>'+
+      '<div class="lbl">Cabelo</div><div class="swatches">'+Object.keys(AV.HAIR).map(function(k){var on=onbHair()===k;return '<button class="sw'+(on?' on':'')+'" style="background:'+(PT?PT.HAIR[k][1]:AV.HAIR[k][0])+'" data-act="onb-set" data-k="hair" data-v="'+k+'" aria-label="Cabelo '+k+'" aria-pressed="'+on+'" title="'+k+'"></button>';}).join('')+'</div></div></div>'+
       '<div class="row end"><button class="btn ghost" data-act="onb-back">Voltar</button><button class="btn primary" data-act="onb-next">Continuar</button></div></section>';
   }else if(st===2){
     h='<section class="sys onbcard"><p class="eyebrow">Passo 2 de 4 · Objetivo</p><h1>Qual é o seu objetivo?</h1><p class="sub">As missões diárias se ajustam a ele. Dá para mudar depois no Status.</p><div class="goals" role="radiogroup" aria-label="Objetivo">'+
@@ -2051,7 +2056,7 @@ function pBody(){
   var a=myAv(),sh=myShape(a),h='';
   if(a&&AV){
     var fn={gordura:'% de gordura',cintura:'cintura e altura',peso:'peso e altura',braco:'braço',peito:'peito e cintura',coxa:'coxa'};
-    h+='<section class="sys bodyav" aria-label="Corpo do avatar"><div>'+avSVG(pubAvatar(),'full','Seu avatar com as medidas atuais')+'</div><div><p class="eyebrow">Corpo do avatar</p><h3 style="font-size:22px">'+AV.label(sh)+'</h3><p class="note" style="margin:6px 0 0">'+
+    h+='<section class="sys bodyav" aria-label="Corpo do avatar"><div>'+avSVG(pubAvatar(),'body','Seu avatar com as medidas atuais')+'</div><div><p class="eyebrow">Corpo do avatar</p><h3 style="font-size:22px">'+AV.label(sh)+'</h3><p class="note" style="margin:6px 0 0">'+
       (a.medidas===false?'O corpo pelas medidas está desligado. Ligue em Personalizar avatar.':sh.fonte.length?'Calculado por: '+sh.fonte.map(function(k){return fn[k];}).join(', ')+'. Registre de novo quando mudar e o avatar acompanha.':'Registre altura com cintura (ou % de gordura) e o braço para o corpo do avatar acompanhar você.')+'</p></div></section>';
   }else if(AV)h+='<div class="card" style="margin-bottom:14px"><p style="margin:0 0 10px">Crie seu avatar e ele vai ganhar a forma das suas medidas.</p><button class="btn sm primary" data-act="av-edit">Criar meu avatar</button></div>';
   h+='<div class="card"><h3 style="margin-bottom:4px">Registrar medidas</h3><p class="note" style="margin-bottom:12px">Use fita métrica, de manhã, sem apertar a pele. Preencha só o que quiser.</p><div class="measures">'+
