@@ -993,7 +993,8 @@ function refreshRelations(){
 function loadSocial(){
   soc.ok=false;
   function q(){return sb.from('profiles').select(pcols()).eq('id',user.id).maybeSingle();}
-  return q().then(function(r){if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q();}return r;}).then(function(r){
+  function fb(r){if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
+  return q().then(fb).then(function(r){
     if(r.error)throw r.error;
     soc.prof=r.data;soc.ok=true;
     if(soc.prof){soc.people[user.id]=soc.prof;syncAvatar();return refreshRelations();}
@@ -1083,12 +1084,14 @@ function fbtn(id){
 }
 function updFbtn(id){document.querySelectorAll('[data-fbtn="'+id+'"]').forEach(function(el){el.innerHTML=fbtn(id);});}
 function personRow(p,extra){
-  return '<div class="card prow"><button class="avbtn" data-act="open-prof" data-id="'+p.id+'" aria-label="Ver perfil de '+esc(pname(p))+'">'+avHTML(p,p.id===(user&&user.id))+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+p.id+'">'+esc(pname(p))+'</button><small>@'+esc(p.username)+(p.is_private?' · <span class="tag">Privado</span>':'')+'</small></div><div class="row">'+(extra||'<span data-fbtn="'+p.id+'">'+fbtn(p.id)+'</span>')+'</div></div>';
+  return '<div class="card prow"><button class="avbtn" data-act="open-prof" data-id="'+p.id+'" aria-label="Ver perfil de '+esc(pname(p))+'">'+avHTML(p,p.id===(user&&user.id))+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+p.id+'">'+esc(pname(p))+'</button><small>@'+esc(p.username)+(p.player_no?' · #'+p.player_no:'')+(p.is_private?' · <span class="tag">Privado</span>':'')+'</small></div><div class="row">'+(extra||'<span data-fbtn="'+p.id+'">'+fbtn(p.id)+'</span>')+'</div></div>';
 }
 
 /* Avatar do Sistema (masculino/feminino) e corpo pelas medidas */
 var AV=window.ENGEFIT_AVATAR||null,NOAV=false;
-function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar');}
+var NOPN=false;
+function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no');}
+function pno(p){return p&&p.player_no?'Jogador #'+p.player_no:'';}
 var MED=[['cin','Cintura','cm',40,250,'84'],['qua','Quadril','cm',50,250,'98'],['pei','Peito','cm',50,250,'100'],['bra','Braço','cm',15,80,'34'],['cox','Coxa','cm',25,120,'56'],['gor','Gordura','%',3,70,'18']];
 function pnum(v){v=String(v==null?'':v).trim().replace(',','.');if(!v)return null;var n=parseFloat(v);return isNaN(n)?NaN:Math.round(n*10)/10;}
 function fmtMeas(x){var p=[];if(x.kg>0)p.push(fmtW(x.kg));MED.forEach(function(m){if(x[m[0]]>0)p.push(m[1].toLowerCase()+' '+num(x[m[0]],x[m[0]]%1?1:0)+(m[2]==='%'?'%':' cm'));});return p.join(' · ');}
@@ -1118,9 +1121,9 @@ function syncAvatar(){
 function statusWin(){
   if(!AV)return '';
   var a=myAv();
-  if(!a)return '<section class="sys statuswin" aria-label="Janela de status"><div class="avduo">'+avSVG({g:'m',rank:'E'},'full','Avatar masculino')+avSVG({g:'f',rank:'E'},'full','Avatar feminino')+'</div><div><p class="eyebrow">Janela de status</p><h2>'+esc(S.settings.name||'Atleta')+'</h2><p class="note" style="margin:8px 0 14px">Escolha seu personagem: masculino ou feminino, tom de pele e cabelo. O corpo acompanha as medidas que você registrar.</p><button class="btn primary" data-act="av-edit">Criar meu avatar</button></div></section>';
+  if(!a)return '<section class="sys statuswin" aria-label="Janela de status"><div class="avduo">'+avSVG({g:'m',rank:'E'},'full','Avatar masculino')+avSVG({g:'f',rank:'E'},'full','Avatar feminino')+'</div><div><p class="eyebrow">Janela de status'+(soc.prof&&soc.prof.player_no?' · Jogador #'+soc.prof.player_no:'')+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2><p class="note" style="margin:8px 0 14px">Escolha seu personagem: masculino ou feminino, tom de pele e cabelo. O corpo acompanha as medidas que você registrar.</p><button class="btn primary" data-act="av-edit">Criar meu avatar</button></div></section>';
   var sh=myShape(a),rk=myRank(),col=AV.AURA[rk];
-  return '<section class="sys statuswin" aria-label="Janela de status"><div class="avfull">'+avSVG(pubAvatar(),'full','Seu avatar')+'</div><div><p class="eyebrow">Janela de status</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
+  return '<section class="sys statuswin" aria-label="Janela de status"><div class="avfull">'+avSVG(pubAvatar(),'full','Seu avatar')+'</div><div><p class="eyebrow">Janela de status'+(soc.prof&&soc.prof.player_no?' · Jogador #'+soc.prof.player_no:'')+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
     '<div class="row" style="margin:12px 0 2px;gap:12px;flex-wrap:nowrap"><span class="rank" style="color:'+col+'">'+rk+'</span><div><b>Rank '+rk+' · Nível '+levelInfo().lv+'</b><br><small class="note">'+levelInfo().xp+' XP no total</small></div></div>'+
     '<div class="swlist"><div class="swrow"><span class="lbl">Objetivo</span><b>'+(S.settings.goal?goalName(S.settings.goal):'Não definido')+'</b></div><div class="swrow"><span class="lbl">Forma</span><b>'+AV.label(sh)+'</b></div><div class="swrow"><span class="lbl">Corpo</span><span>'+(a.medidas===false?'Padrão':sh.fonte.length?'Pelas suas medidas':'Padrão · sem medidas')+'</span></div></div>'+
     '<div class="row"><button class="btn sm primary" data-act="av-edit">Personalizar avatar</button><button class="btn sm" data-act="goal-edit">Objetivo</button><button class="btn sm" data-act="ptab" data-v="body">Medidas</button></div></div></section>';
@@ -1335,7 +1338,7 @@ function streak(){
 }
 function heroHTML(){
   var L=levelInfo(),a=myAv(),col=AV?AV.AURA[L.rank]:'#9aa4b5',st=streak();
-  return '<section class="sys hero" aria-label="Seu status"><div class="heroav">'+(a&&AV?avSVG(pubAvatar(),'bust','Seu avatar'):'<button class="btn sm" data-act="av-edit">Criar avatar</button>')+'</div><div class="herotx"><p class="eyebrow">Jogador · '+goalName(myGoal())+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
+  return '<section class="sys hero" aria-label="Seu status"><div class="heroav">'+(a&&AV?avSVG(pubAvatar(),'bust','Seu avatar'):'<button class="btn sm" data-act="av-edit">Criar avatar</button>')+'</div><div class="herotx"><p class="eyebrow">'+(soc.prof&&soc.prof.player_no?'Jogador #'+soc.prof.player_no:'Jogador')+' · '+goalName(myGoal())+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
     '<div class="row" style="gap:12px;margin:8px 0 6px;flex-wrap:nowrap"><span class="rank" style="color:'+col+'">'+L.rank+'</span><div><b class="lvl">Nível '+L.lv+'</b><br><small class="note">Sequência: '+st+(st===1?' dia':' dias')+'</small></div></div>'+
     '<div class="xpbar" role="progressbar" aria-label="Experiência até o próximo nível" aria-valuemin="0" aria-valuemax="'+L.need+'" aria-valuenow="'+L.cur+'"><i style="width:'+Math.round(L.cur/L.need*100)+'%"></i></div><small class="mono note">'+L.cur+' / '+L.need+' XP</small></div></section>';
 }
@@ -1438,7 +1441,7 @@ function loadRanking(){
     rows.sort(function(x,y){return y.lv-x.lv||y.xp-x.xp||pname(x.p).localeCompare(pname(y.p));});
     var mine=-1;rows.forEach(function(x,i){if(x.p.id===user.id)mine=i;});
     function row(x,i){var rk=x.a.rank||rankOf(x.lv),col=AV?AV.AURA[rk]:'#9aa4b5',me2=x.p.id===user.id;
-      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+'</small></div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span><b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small></span></div></div>';}
+      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+(x.p.player_no?' · #'+x.p.player_no:'')+'</small></div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span><b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small></span></div></div>';}
     var h=rows.slice(0,50).map(row).join('');
     if(mine>=50)h+='<p class="note" style="text-align:center">…</p>'+row(rows[mine],mine);
     el.innerHTML=h||'<p class="empty">Ainda não há jogadores no ranking.</p>';
@@ -1491,7 +1494,7 @@ function openProfile(uid){
       if(st.err)return head('Perfil')+'<p class="empty">Não foi possível abrir este perfil.</p>';
       if(!p)return head('Perfil')+'<div class="spin" role="status" aria-label="Carregando"></div>';
       var me=uid===user.id,vis=me||!p.is_private||soc.following[uid]==='accepted',s=st.stats||{};
-      var h=head(pname(p))+'<p class="note" style="margin:-8px 0 14px">@'+esc(p.username)+(p.is_private?' · <span class="tag">Privado</span>':'')+'</p>';
+      var h=head(pname(p))+'<p class="note" style="margin:-8px 0 14px">@'+esc(p.username)+(p.player_no?' · Jogador #'+p.player_no:'')+(p.is_private?' · <span class="tag">Privado</span>':'')+'</p>';
       var pa=me?pubAvatar():p.avatar;if(pa&&pa.g&&AV)h+='<div class="sys profav">'+avSVG(pa,'bust','Avatar de '+pname(p))+'</div>';
       h+='<div class="kv"><div class="tile"><span class="lbl">Treinos</span><b>'+(s.workouts!=null?s.workouts:'–')+'</b></div><div class="tile"><span class="lbl">Seguidores</span><b>'+(s.followers!=null?s.followers:'–')+'</b></div><div class="tile"><span class="lbl">Seguindo</span><b>'+(s.following!=null?s.following:'–')+'</b></div></div>';
       if(!me)h+='<div class="row" style="margin-bottom:16px"><span data-fbtn="'+uid+'">'+fbtn(uid)+'</span></div>';
