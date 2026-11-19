@@ -350,6 +350,15 @@ body:not(.authmode) #install{margin-left:var(--side)}
 .ptr{display:block;width:100%;height:auto;border-radius:10px;user-select:none;-webkit-user-drag:none}.av .ptr{border-radius:50%;height:100%;object-fit:cover}
 .av.has{background:#07101f;border-color:rgba(63,184,255,.5);padding:0}
 .statuswin{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:18px;padding:14px 18px;margin-bottom:18px;align-items:center}
+.ptitle{margin:2px 0 0;font:600 13px/1.3 var(--display);letter-spacing:.04em;color:#ffd66b;text-shadow:0 0 10px rgba(255,204,51,.35)}.ptitle.sm{font-size:11.5px;margin:1px 0 0}
+.achstrip{margin-bottom:14px}.achstrip h3{margin:0}.achrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.medal{display:block;flex:none}.medal.on{filter:drop-shadow(0 0 6px rgba(63,184,255,.25))}
+.achg{margin:18px 0 8px;font-size:15px}.achlist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ach{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}.ach:not(.on) .achtx>b{color:var(--muted)}
+.achtx{flex:1;min-width:0}.achtx .note{margin:2px 0 4px}.achtx .qbar{margin:6px 0 2px}.rar{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+#achpop{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-140%);display:flex;gap:12px;align-items:center;min-width:260px;max-width:calc(100% - 24px);padding:12px 16px;border:1px solid rgba(63,184,255,.7);border-radius:10px;background:rgba(6,12,24,.96);box-shadow:0 0 24px -4px rgba(63,184,255,.6);z-index:60;transition:transform .35s cubic-bezier(.2,.9,.3,1.2);color:#e8f4ff}
+#achpop.show{transform:translate(-50%,0)}#achpop b{display:block;font-size:16px}#achpop small{color:var(--muted)}#achpop .eyebrow{margin:0 0 2px}
+@media (prefers-reduced-motion:reduce){#achpop{transition:none}}
 .rcbox{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;border:1px dashed rgba(63,184,255,.6);border-radius:8px;background:rgba(63,184,255,.06)}.rccode{font-size:20px;letter-spacing:.08em;font-weight:700;color:#e8f4ff;user-select:all}
 .statuswin .avfull svg{width:100%;height:auto;display:block}
 .statuswin h2{font-size:26px}
@@ -1231,7 +1240,7 @@ function refreshRelations(){
 function loadSocial(){
   soc.ok=false;
   function q(){return sb.from('profiles').select(pcols()).eq('id',user.id).maybeSingle();}
-  function fb(r){if(r.error&&!NOXP&&/\b(xp|lv|rk)\b/i.test(r.error.message||'')){NOXP=true;return q().then(fb);}if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
+  function fb(r){if(r.error&&!NOCQ&&/conq/i.test(r.error.message||'')){NOCQ=true;return q().then(fb);}if(r.error&&!NOXP&&/\b(xp|lv|rk)\b/i.test(r.error.message||'')){NOXP=true;return q().then(fb);}if(r.error&&!NOPN&&/player_no/i.test(r.error.message||'')){NOPN=true;return q().then(fb);}if(r.error&&!NOAV&&/avatar/i.test(r.error.message||'')){NOAV=true;return q().then(fb);}return r;}
   return q().then(fb).then(function(r){
     if(r.error)throw r.error;
     soc.prof=r.data;soc.ok=true;
@@ -1326,9 +1335,9 @@ function personRow(p,extra){
 }
 
 /* Avatar do Sistema (masculino/feminino) e corpo pelas medidas */
-var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false,NOXP=false;
+var AV=window.ENGEFIT_AVATAR||null,PT=window.ENGEFIT_PORTRAIT||null,NOAV=false,NOXP=false,NOCQ=false;
 var NOPN=false;
-function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no')+(NOXP?'':',xp,lv,rk');}
+function pcols(){return 'id,username,name,is_private'+(NOAV?'':',avatar')+(NOPN?'':',player_no')+(NOXP?'':',xp,lv,rk')+(NOCQ?'':',conq');}
 // Avatar público de alguém com nível/XP/rank validados pelo servidor (colunas xp, lv, rk), quando existem.
 function srvAv(p){var a=Object.assign({},(p&&p.avatar)||{});if(p&&!NOXP&&p.lv!=null){a.lv=+p.lv;a.xp=+p.xp||0;a.rank=p.rk||rankOf(a.lv);}return a;}
 function pno(p){return p&&p.player_no?'Jogador #'+p.player_no:'';}
@@ -1343,7 +1352,7 @@ function myMeasures(){
 function myAv(){var a=S.settings.avatar;return a&&a.g?a:null;}
 function myRank(){return S&&S.workouts?levelInfo().rank:'E';}
 function myShape(a){a=a||myAv()||{g:'m'};if(!AV||a.medidas===false)return {fat:0,mus:0,fonte:[]};return AV.shape(a.g,myMeasures());}
-function pubAvatar(){var a=myAv(),L=levelInfo(),o={rank:L.rank,lv:L.lv,xp:L.xp};if(!a)return o;o.g=a.g;o.skin=a.skin;o.hair=a.hair;if(a.medidas!==false){var sh=myShape(a);o.fat=sh.fat;o.mus=sh.mus;}return o;}
+function pubAvatar(){var a=myAv(),L=levelInfo(),o={rank:L.rank,lv:L.lv,xp:L.xp},tt=myTitleId();if(tt)o.tt=tt;if(!a)return o;o.g=a.g;o.skin=a.skin;o.hair=a.hair;if(a.medidas!==false){var sh=myShape(a);o.fat=sh.fat;o.mus=sh.mus;}return o;}
 // Retrato (estilo manhwa) em toda parte; o corpo inteiro que acompanha as medidas fica só na tela de Medidas (view 'body').
 function avSVG(a,view,label){if(!a||!a.g)return '';
   if(PT&&view!=='body')return PT.img({g:a.g,skin:a.skin,hair:a.hair},(AV&&AV.AURA[a.rank])||'#9aa4b5',view==='head'?'head':'bust',label);
@@ -1366,7 +1375,7 @@ function statusWin(){
   var a=myAv();
   if(!a)return '<section class="sys statuswin" aria-label="Janela de status"><div class="avduo">'+avSVG({g:'m',rank:'E'},'full','Avatar masculino')+avSVG({g:'f',rank:'E'},'full','Avatar feminino')+'</div><div><p class="eyebrow">Janela de status'+(soc.prof&&soc.prof.player_no?' · Jogador #'+soc.prof.player_no:'')+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2><p class="note" style="margin:8px 0 14px">Escolha seu personagem: masculino ou feminino, tom de pele e cabelo. O corpo acompanha as medidas que você registrar.</p><button class="btn primary" data-act="av-edit">Criar meu avatar</button></div></section>';
   var sh=myShape(a),rk=myRank(),col=AV.AURA[rk];
-  return '<section class="sys statuswin" aria-label="Janela de status"><div class="avfull">'+avSVG(pubAvatar(),'full','Seu avatar')+'</div><div><p class="eyebrow">Janela de status'+(soc.prof&&soc.prof.player_no?' · Jogador #'+soc.prof.player_no:'')+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
+  return '<section class="sys statuswin" aria-label="Janela de status"><div class="avfull">'+avSVG(pubAvatar(),'full','Seu avatar')+'</div><div><p class="eyebrow">Janela de status'+(soc.prof&&soc.prof.player_no?' · Jogador #'+soc.prof.player_no:'')+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+titleHTML(titleOf(null,true))+
     '<div class="row" style="margin:12px 0 2px;gap:12px;flex-wrap:nowrap"><span class="rank" style="color:'+col+'">'+rk+'</span><div><b>Rank '+rk+' · Nível '+levelInfo().lv+'</b><br><small class="note">'+levelInfo().xp+' XP no total</small></div></div>'+
     '<div class="swlist"><div class="swrow"><span class="lbl">Objetivo</span><b>'+(S.settings.goal?goalName(S.settings.goal):'Não definido')+'</b></div><div class="swrow"><span class="lbl">Forma</span><b>'+AV.label(sh)+'</b></div><div class="swrow"><span class="lbl">Corpo</span><span>'+(a.medidas===false?'Padrão':sh.fonte.length?'Pelas suas medidas':'Padrão · sem medidas')+'</span></div></div>'+
     '<div class="row"><button class="btn sm primary" data-act="av-edit">Personalizar avatar</button><button class="btn sm" data-act="goal-edit">Objetivo</button><button class="btn sm" data-act="ptab" data-v="body">Medidas</button></div></div></section>';
@@ -1559,6 +1568,140 @@ function missionsHTML(){
   return h+'</section>';
 }
 
+
+/* ---------- Conquistas (32 medalhas) ----------
+   Mesmas regras do servidor (supabase/conquistas.sql · engefit_avaliar): até 2 treinos por dia, carga até 500 kg,
+   até 100 repetições. O servidor guarda a lista validada em profiles.conq; títulos de outros jogadores só
+   aparecem se a conquista estiver nessa lista. */
+var ACH_G=['Treinos','Carga levantada','Recordes pessoais','Constância','Missões e Sistema','Rank','Horário e intensidade','Corpo e dieta'];
+var ACH_C=['#9aa4b5','#3fb8ff','#a66bff','#ffcc33'],ACH_R=['Comum','Rara','Épica','Lendária'];
+// [id, grupo, nome, descrição, raridade, título, métrica, meta]
+var ACH=[
+ ['t1',0,'Despertar','Concluir o primeiro treino.',0,'Despertado','wk',1],
+ ['t10',0,'Primeiros Passos','Concluir 10 treinos.',0,'','wk',10],
+ ['t50',0,'Veterano','Concluir 50 treinos.',1,'Veterano','wk',50],
+ ['t100',0,'Centurião','Concluir 100 treinos.',2,'Centurião','wk',100],
+ ['t250',0,'Lenda Viva','Concluir 250 treinos.',3,'Lenda Viva','wk',250],
+ ['v1',1,'Primeira Tonelada','Levantar 1.000 kg somando todos os treinos.',0,'','vol',1000],
+ ['v10',1,'Carregador','Levantar 10 toneladas no total.',1,'','vol',10000],
+ ['v100',1,'Titã','Levantar 100 toneladas no total.',2,'Titã','vol',100000],
+ ['v500',1,'Atlas','Levantar 500 toneladas no total.',3,'Atlas','vol',500000],
+ ['r1',2,'Quebra-Limite','Bater o primeiro recorde de carga num exercício.',0,'','pr',1],
+ ['r25',2,'Caçador de Recordes','Bater 25 recordes de carga.',1,'Caçador de Recordes','pr',25],
+ ['r100',2,'Além do Limite','Bater 100 recordes de carga.',2,'Sem Limites','pr',100],
+ ['s3',3,'Aquecendo','3 dias seguidos com a missão diária completa.',0,'','best',3],
+ ['s7',3,'Disciplinado','7 dias seguidos com a missão diária completa.',1,'Disciplinado','best',7],
+ ['s30',3,'Inabalável','30 dias seguidos com a missão diária completa.',2,'Inabalável','best',30],
+ ['s100',3,'Imparável','100 dias seguidos com a missão diária completa.',3,'Imparável','best',100],
+ ['m1',4,'Missão Cumprida','Completar a primeira missão diária.',0,'','req',1],
+ ['agua',4,'Hidratado','Bater a meta de água em 30 dias (não precisam ser seguidos).',1,'','wa',30],
+ ['passos',4,'Andarilho','Bater a meta de passos em 30 dias.',1,'','st',30],
+ ['desafio',4,'Desafiante','Completar 10 desafios do Sistema.',1,'Desafiante','ch',10],
+ ['redencao',4,'Redenção','Cumprir uma missão de penalidade.',0,'Redimido','pen',1],
+ ['rD',5,'Rank D','Alcançar o nível 5.',0,'','lv',5],
+ ['rC',5,'Rank C','Alcançar o nível 10.',1,'','lv',10],
+ ['rB',5,'Rank B','Alcançar o nível 20.',2,'','lv',20],
+ ['rA',5,'Rank A','Alcançar o nível 35.',2,'','lv',35],
+ ['rS',5,'Rank S','Alcançar o nível 55.',3,'Rank S','lv',55],
+ ['madrug',6,'Madrugador','Começar 10 treinos antes das 7 h.',1,'Madrugador','madr',10],
+ ['coruja',6,'Coruja','Começar 10 treinos depois das 22 h.',1,'Coruja','coru',10],
+ ['maratona',6,'Maratona de Séries','Fazer 30 séries ou mais num único treino.',1,'','maxsets',30],
+ ['medida',7,'Autoconhecimento','Registrar a primeira medição corporal.',0,'','medida',1],
+ ['transf',7,'Transformação','Mudar 5 kg na direção do seu objetivo desde a primeira pesagem.',2,'Transformado','delta',5],
+ ['diario',7,'Diário em Dia','Anotar 3 refeições ou mais em 7 dias.',1,'','diario',7]
+];
+var ACHM={};ACH.forEach(function(a){ACHM[a[0]]=a;});
+function achMetrics(){
+  var t=today(),M={wk:0,vol:0,pr:0,best:0,req:0,wa:0,st:0,ch:0,pen:0,lv:levelInfo().lv,madr:0,coru:0,maxsets:0,medida:0,delta:0,diario:0};
+  var per={};S.workouts.forEach(function(w){var k=dkey(w.start);if(k>t)return;(per[k]=per[k]||[]).push({w:w,n:wkStats(w).sets});});
+  var list=[];Object.keys(per).forEach(function(k){per[k].sort(function(a,b){return b.n-a.n||a.w.start-b.w.start;}).slice(0,2).forEach(function(x){list.push(x);});});
+  list.sort(function(a,b){return a.w.start-b.w.start;});
+  var bests={};
+  list.forEach(function(x){
+    var h=new Date(x.w.start).getHours();M.wk++;if(h<7)M.madr++;if(h>=22)M.coru++;M.maxsets=Math.max(M.maxsets,x.n);
+    (x.w.exs||[]).forEach(function(e){var mx=0;
+      (e.sets||[]).forEach(function(st){if(!st.done||st.t==='W')return;var k=+st.kg||0,r=+st.reps||0;if(k<=0||k>500||r<=0||r>100)return;M.vol+=k*r;if(k>mx)mx=k;});
+      if(mx>0&&e.ex){if(bests[e.ex]!=null&&mx>bests[e.ex])M.pr++;if(bests[e.ex]==null||mx>bests[e.ex])bests[e.ex]=mx;}
+    });
+  });
+  var run=0,prev=null;
+  Object.keys(S.daily||{}).filter(function(k){return /^\d{4}-\d{2}-\d{2}$/.test(k)&&k<=t;}).sort().forEach(function(k){
+    var e=dayEval(k),r=S.daily[k]||{};
+    if(e.steps)M.st++;if(e.water)M.wa++;if(e.chal)M.ch++;if((r.pc||[]).length>=4)M.pen=1;
+    if(e.req){M.req++;run=(prev&&dkOff(prev,1)===k)?run+1:1;prev=k;M.best=Math.max(M.best,run);}else{run=0;prev=null;}
+  });
+  var F=['kg','cin','qua','pei','bra','cox','gor'];
+  if(S.body.some(function(b){return F.some(function(f){return b[f]>0;});}))M.medida=1;
+  var ws=S.body.filter(function(b){return b.kg>=20&&b.kg<=400;}).sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0;});
+  if(ws.length){var k0=ws[0].kg,k1=ws[ws.length-1].kg;M.delta=(myGoal()==='massa'||myGoal()==='forca')?k1-k0:k0-k1;}
+  var nd=(S.nutri&&S.nutri.days)||{};
+  Object.keys(nd).forEach(function(k){if(k>t)return;var m={};((nd[k]&&nd[k].items)||[]).forEach(function(i){if(i&&i.m)m[i.m]=1;});if(Object.keys(m).length>=3)M.diario++;});
+  return M;
+}
+var achCache={k:'',v:null};
+function achState(){
+  var key=levelInfo().xp+'|'+S.workouts.length+'|'+JSON.stringify(S.body).length+'|'+JSON.stringify((S.nutri&&S.nutri.days)||{}).length+'|'+JSON.stringify(S.workouts).length+'|'+today();
+  if(achCache.k===key)return achCache.v;
+  var M=achMetrics(),done={},n=0;ACH.forEach(function(a){if(M[a[6]]>=a[7]){done[a[0]]=1;n++;}});
+  var v={M:M,done:done,n:n};achCache={k:key,v:v};return v;
+}
+function myTitleId(){var id=S.settings.title;return id&&ACHM[id]&&ACHM[id][5]&&achState().done[id]?id:'';}
+function titleOf(p,me){
+  if(me){var i=myTitleId();return i?ACHM[i][5]:'';}
+  var a=(p&&p.avatar)||{},id=a.tt;if(!id||!ACHM[id]||!ACHM[id][5])return '';
+  if(!NOCQ&&p&&Array.isArray(p.conq)&&p.conq.indexOf(id)<0)return '';
+  return ACHM[id][5];
+}
+function titleHTML(t,cls){return t?'<p class="ptitle'+(cls?' '+cls:'')+'">« '+esc(t)+' »</p>':'';}
+var ACH_ICON={0:'<path d="M15 24h18M12 19v10M16.5 17v14M31.5 17v14M36 19v10"/>',1:'<circle cx="24" cy="24" r="9"/><circle cx="24" cy="24" r="2.5"/>',2:'<path d="M24 34V14M16 22l8-8 8 8"/>',3:'<path d="M24 13c4 5 8 8 8 13a8 8 0 0 1-16 0c0-4 3-6 4-9 1 3 2 4 4 4-1-3-1-5 0-8z"/>',4:'<path d="M15 25l6 6 12-13"/>',
+  7:'<path d="M14 31h20M15 31v-4M19.5 31v-3M24 31v-4M28.5 31v-3M33 31v-4M17 22c2-6 12-6 14 0"/>',madrug:'<circle cx="24" cy="26" r="6"/><path d="M24 13v3M14 26h-3M37 26h-3M16.5 18.5l2 2M31.5 18.5l-2 2M12 34h24"/>',coruja:'<path d="M29 14a10 10 0 1 0 5 17 8 8 0 0 1-5-17z"/>',maratona:'<path d="M26 12l-9 14h7l-2 10 9-14h-7z"/>',diario:'<path d="M19 13v9a3 3 0 0 0 6 0v-9M22 13v23M29 13c3 2 3 9 0 11v12"/>'};
+function medal(id,on,big){
+  var a=ACHM[id],col=on?ACH_C[a[4]]:'#4a5466',g=ACH_ICON[id]||ACH_ICON[a[1]],sz=big?56:40;
+  var inner=a[1]===5?'<text x="24" y="31" text-anchor="middle" font-size="20" font-weight="700" fill="'+col+'" stroke="none" font-family="var(--display)">'+id.slice(1)+'</text>':g;
+  return '<svg class="medal'+(on?' on':'')+'" width="'+sz+'" height="'+sz+'" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z" fill="'+(on?'rgba(10,16,30,.92)':'rgba(20,24,34,.8)')+'" stroke="'+col+'" stroke-width="2"/><path d="M24 7.5l14.2 8.3v16.4L24 40.5 9.8 32.2V15.8z" fill="none" stroke="'+col+'" stroke-opacity=".35"/><g fill="none" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+inner+'</g>'+(on?'':'<g transform="translate(31 31)"><rect x="0" y="5" width="11" height="9" rx="2" fill="#4a5466"/><path d="M2.5 5V3a3 3 0 0 1 6 0v2" fill="none" stroke="#4a5466" stroke-width="2"/></g>')+'</svg>';
+}
+function achProg(a,M){var v=Math.min(M[a[6]]||0,a[7]),g=a[7];if(a[6]==='vol')return [v/1000,g/1000,' t'];if(a[6]==='delta')return [Math.max(0,v),g,' kg'];return [v,g,''];}
+function achStrip(){
+  var st=achState(),got=ACH.filter(function(a){return st.done[a[0]];}).sort(function(x,y){return ((S.ach||{})[y[0]]||'').localeCompare((S.ach||{})[x[0]]||'')||y[4]-x[4];}).slice(0,6);
+  return '<section class="card achstrip" aria-labelledby="acht"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div><h3 id="acht">Conquistas</h3><small class="note mono">'+st.n+' de '+ACH.length+'</small></div><button class="btn sm" data-act="ach-open">Ver todas</button></div>'+
+    '<div class="achrow">'+(got.length?got.map(function(a){return '<span title="'+esc(a[2])+'">'+medal(a[0],true)+'</span>';}).join(''):'<p class="note" style="margin:0">Conclua seu primeiro treino para ganhar a primeira medalha.</p>')+'</div></section>';
+}
+function achModal(){
+  pushModal({title:'Conquistas',html:function(){
+    var st=achState(),M=st.M,tid=myTitleId(),h=head('Conquistas')+'<p class="note" style="margin:-6px 0 12px">'+st.n+' de '+ACH.length+' desbloqueadas. Conquistas não dão XP: dão medalha e, algumas, um título para mostrar no perfil e no ranking.</p>';
+    h+='<div class="card" style="margin-bottom:14px"><div class="lbl">Título em uso</div><b>'+(tid?esc(ACHM[tid][5]):'Nenhum')+'</b>'+(tid?' <button class="linkbtn" data-act="ach-title" data-v="">Tirar título</button>':'')+'</div>';
+    ACH_G.forEach(function(g,gi){
+      h+='<h3 class="achg">'+g+'</h3><ul class="achlist">';
+      ACH.filter(function(a){return a[1]===gi;}).forEach(function(a){
+        var on=!!st.done[a[0]],pr=achProg(a,M),dt=(S.ach||{})[a[0]];
+        h+='<li class="ach'+(on?' on':'')+'">'+medal(a[0],on,true)+'<div class="achtx"><b>'+esc(a[2])+'</b> <small class="rar" style="color:'+ACH_C[a[4]]+'">'+ACH_R[a[4]]+'</small><p class="note">'+esc(a[3])+'</p>'+
+          (on?(dt?'<small class="note mono">Desbloqueada em '+dt.split('-').reverse().join('/')+'</small>':''):'<div class="qbar" role="progressbar" aria-label="Progresso de '+esc(a[2])+'" aria-valuemin="0" aria-valuemax="'+pr[1]+'" aria-valuenow="'+pr[0]+'"><i style="width:'+Math.round(pr[0]/pr[1]*100)+'%"></i></div><small class="note mono">'+num(pr[0],pr[0]%1?1:0)+' / '+num(pr[1],0)+pr[2]+'</small>')+
+          (a[5]?'<div class="row" style="margin-top:6px;gap:8px;align-items:center"><small class="note">Título: «'+esc(a[5])+'»</small>'+(on?(tid===a[0]?'<span class="tag">Em uso</span>':'<button class="btn sm" data-act="ach-title" data-v="'+a[0]+'">Usar título</button>'):'')+'</div>':'')+
+          '</div></li>';
+      });
+      h+='</ul>';
+    });
+    return h;}});
+}
+var achQ=[],achT=null;
+function achPop(){
+  if(achT||!achQ.length)return;var x=achQ.shift(),el=$('#achpop');
+  if(!el){el=document.createElement('div');el.id='achpop';el.setAttribute('role','status');el.setAttribute('aria-live','polite');document.body.appendChild(el);}
+  el.innerHTML=x.id?medal(x.id,true,true)+'<div><p class="eyebrow">Conquista desbloqueada</p><b>'+esc(ACHM[x.id][2])+'</b>'+(ACHM[x.id][5]?'<small>Título liberado: «'+esc(ACHM[x.id][5])+'»</small>':'<small>'+esc(ACHM[x.id][3])+'</small>')+'</div>':'<div><p class="eyebrow">Sistema</p><b>'+esc(x.t)+'</b><small>Veja em Status › Conquistas.</small></div>';
+  el.classList.add('show');
+  achT=setTimeout(function(){el.classList.remove('show');setTimeout(function(){achT=null;achPop();},350);},3400);
+}
+function achSync(){
+  if(!user||!S||!S.workouts)return;
+  var st=achState(),first=!S.ach,d=today(),nw=[];
+  if(first)S.ach={};
+  ACH.forEach(function(a){if(st.done[a[0]]&&!S.ach[a[0]]){S.ach[a[0]]=d;nw.push(a[0]);}});
+  if(!nw.length&&!first)return;
+  if(first){if(nw.length)achQ.push({t:'Seu histórico já rendeu '+nw.length+(nw.length===1?' conquista':' conquistas')+'.'});}
+  else nw.forEach(function(id){achQ.push({id:id});});
+  save();achPop();
+}
+
 /* ---------- XP, nível e rank ---------- */
 function xpNeed(n){return 100+20*(n-1);}
 function rankOf(lv){return lv>=55?'S':lv>=35?'A':lv>=20?'B':lv>=10?'C':lv>=5?'D':'E';}
@@ -1588,7 +1731,7 @@ function streak(){
 }
 function heroHTML(){
   var L=levelInfo(),a=myAv(),col=AV?AV.AURA[L.rank]:'#9aa4b5',st=streak();
-  return '<section class="sys hero" aria-label="Seu status"><div class="heroav">'+(a&&AV?avSVG(pubAvatar(),'bust','Seu avatar'):'<button class="btn sm" data-act="av-edit">Criar avatar</button>')+'</div><div class="herotx"><p class="eyebrow">'+(soc.prof&&soc.prof.player_no?'Jogador #'+soc.prof.player_no:'Jogador')+' · '+goalName(myGoal())+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+
+  return '<section class="sys hero" aria-label="Seu status"><div class="heroav">'+(a&&AV?avSVG(pubAvatar(),'bust','Seu avatar'):'<button class="btn sm" data-act="av-edit">Criar avatar</button>')+'</div><div class="herotx"><p class="eyebrow">'+(soc.prof&&soc.prof.player_no?'Jogador #'+soc.prof.player_no:'Jogador')+' · '+goalName(myGoal())+'</p><h2>'+esc(S.settings.name||'Atleta')+'</h2>'+titleHTML(titleOf(null,true))+
     '<div class="row" style="gap:12px;margin:8px 0 6px;flex-wrap:nowrap"><span class="rank" style="color:'+col+'">'+L.rank+'</span><div><b class="lvl">Nível '+L.lv+'</b><br><small class="note">Sequência: '+st+(st===1?' dia':' dias')+'</small></div></div>'+
     '<div class="xpbar" role="progressbar" aria-label="Experiência até o próximo nível" aria-valuemin="0" aria-valuemax="'+L.need+'" aria-valuenow="'+L.cur+'"><i style="width:'+Math.round(L.cur/L.need*100)+'%"></i></div><small class="mono note">'+L.cur+' / '+L.need+' XP</small></div></section>';
 }
@@ -1691,7 +1834,7 @@ function loadRanking(){
     rows.sort(function(x,y){return y.lv-x.lv||y.xp-x.xp||pname(x.p).localeCompare(pname(y.p));});
     var mine=-1;rows.forEach(function(x,i){if(x.p.id===user.id)mine=i;});
     function row(x,i){var rk=x.a.rank||rankOf(x.lv),col=AV?AV.AURA[rk]:'#9aa4b5',me2=x.p.id===user.id;
-      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+(x.p.player_no?' · #'+x.p.player_no:'')+'</small></div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span><b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small></span></div></div>';}
+      return '<div class="card prow lrow'+(me2?' me':'')+(i<3?' top':'')+'"><span class="lpos mono">'+(i+1)+'º</span><button class="avbtn" data-act="open-prof" data-id="'+x.p.id+'" aria-label="Ver perfil de '+esc(pname(x.p))+'">'+avHTML(x.p,me2)+'</button><div class="pinfo"><button class="namebtn" data-act="open-prof" data-id="'+x.p.id+'">'+esc(pname(x.p))+(me2?' (você)':'')+'</button><small>@'+esc(x.p.username)+(x.p.player_no?' · #'+x.p.player_no:'')+'</small>'+titleHTML(titleOf(x.p,me2),'sm')+'</div><div class="lstat"><span class="rank sm" style="color:'+col+'">'+rk+'</span><span><b>Nv '+x.lv+'</b><small class="mono">'+x.xp.toLocaleString('pt-BR')+' XP</small></span></div></div>';}
     var h=rows.slice(0,50).map(row).join('');
     if(mine>=50)h+='<p class="note" style="text-align:center">…</p>'+row(rows[mine],mine);
     el.innerHTML=h||'<p class="empty">Ainda não há jogadores no ranking.</p>';
@@ -1745,7 +1888,7 @@ function openProfile(uid){
       if(!p)return head('Perfil')+'<div class="spin" role="status" aria-label="Carregando"></div>';
       var me=uid===user.id,vis=me||!p.is_private||soc.following[uid]==='accepted',s=st.stats||{};
       var h=head(pname(p))+'<p class="note" style="margin:-8px 0 14px">@'+esc(p.username)+(p.player_no?' · Jogador #'+p.player_no:'')+(p.is_private?' · <span class="tag">Privado</span>':'')+'</p>';
-      var pa=me?pubAvatar():srvAv(p);if(pa&&pa.g&&AV)h+='<div class="sys profav">'+avSVG(pa,'bust','Avatar de '+pname(p))+'</div>';
+      var pa=me?pubAvatar():srvAv(p);if(pa&&pa.g&&AV)h+='<div class="sys profav">'+avSVG(pa,'bust','Avatar de '+pname(p))+'</div>';h+=titleHTML(titleOf(p,me));if(me||(!NOCQ&&Array.isArray(p.conq))){var cq=me?ACH.filter(function(a){return achState().done[a[0]];}).map(function(a){return a[0];}):p.conq.filter(function(i){return ACHM[i];});h+='<div class="card achstrip" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3>Conquistas</h3><small class="note mono">'+cq.length+' de '+ACH.length+'</small></div><div class="achrow">'+cq.slice().sort(function(x,y){return ACHM[y][4]-ACHM[x][4];}).slice(0,8).map(function(i){return '<span title="'+esc(ACHM[i][2])+'">'+medal(i,true)+'</span>';}).join('')+'</div></div>';}
       h+='<div class="kv"><div class="tile"><span class="lbl">Treinos</span><b>'+(s.workouts!=null?s.workouts:'–')+'</b></div><div class="tile"><span class="lbl">Seguidores</span><b>'+(s.followers!=null?s.followers:'–')+'</b></div><div class="tile"><span class="lbl">Seguindo</span><b>'+(s.following!=null?s.following:'–')+'</b></div></div>';
       if(!me)h+='<div class="row" style="margin-bottom:16px"><span data-fbtn="'+uid+'">'+fbtn(uid)+'</span></div>';
       if(!vis)return h+'<div class="card"><p class="empty">Este perfil é privado. '+(soc.following[uid]==='pending'?'Seu pedido está aguardando aprovação.':'Siga para pedir acesso aos treinos.')+'</p></div>';
@@ -2016,7 +2159,7 @@ function bucketWeeks(n){
 function vPerfil(){
   var tw=S.workouts.length,tv=0,ts=0,td=0,tp=0;
   S.workouts.forEach(function(w){var s=wkStats(w);tv+=s.vol;ts+=s.sets;td+=w.dur;tp+=w.prs||0;});
-  var h=ph('Status · @'+myUname(),S.settings.name||'Atleta')+'<div class="wrap">'+statusWin()+'<div id="mysoc">'+mySocHTML()+'</div>';
+  var h=ph('Status · @'+myUname(),S.settings.name||'Atleta')+'<div class="wrap">'+statusWin()+achStrip()+'<div id="mysoc">'+mySocHTML()+'</div>';
   h+='<div class="tiles"><div class="tile"><span class="lbl">Treinos</span><b>'+tw+'</b></div><div class="tile"><span class="lbl">Volume total</span><b>'+fmtVol(tv)+'</b></div><div class="tile"><span class="lbl">Séries</span><b>'+ts+'</b></div><div class="tile"><span class="lbl">Tempo treinado</span><b>'+(td?Math.round(td/3600)+' h':'0 h')+'</b></div></div>';
   h+='<div class="scroll-x" style="margin:20px 0 16px"><div class="seg">'+[['stats','Estatísticas'],['rel','Relatório'],['cal','Calendário'],['body','Corpo'],['tools','Ferramentas'],['cfg','Ajustes']].map(function(t){return '<button data-act="ptab" data-v="'+t[0]+'" class="'+(ui.ptab===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div></div>';
   h+=({stats:pStats,rel:pRel,cal:pCal,body:pBody,tools:pTools,cfg:pCfg}[ui.ptab])();
@@ -2171,6 +2314,7 @@ function drawMini(){
 }
 function render(){
   if(user&&soc.prof)syncAvatar();
+  achSync();
   var y=window.scrollY;
   document.querySelectorAll('[data-nav]').forEach(function(a){var on=a.dataset.nav===ui.view;a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   $('#view').innerHTML=({inicio:vInicio,treino:vTreino,dieta:vDieta,exercicios:vExercicios,pessoas:vPessoas,perfil:vPerfil})[ui.view]();
@@ -2230,6 +2374,8 @@ var ACT={
  'soc-list':function(el){socList(el.dataset.v);},
  'chpw':changePw,
  'rc-new':rcNew,
+ 'ach-open':achModal,
+ 'ach-title':function(el){S.settings.title=el.dataset.v||'';save();drawModal();render();toast(el.dataset.v?'Título em uso: «'+ACHM[el.dataset.v][5]+'».':'Título removido.');},
  'rec-enter':recEnter,
  'rc-copy':function(el){var c=el.dataset.v;(navigator.clipboard?navigator.clipboard.writeText(c):Promise.reject()).then(function(){toast('Código copiado.');}).catch(function(){toast('Não deu para copiar. Anote: '+c);});},
  'routine-new':function(){routineEditor(null);},
