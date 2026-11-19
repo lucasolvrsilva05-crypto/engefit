@@ -464,7 +464,7 @@ function drawProp(pr,o){
     case 'cable':var a2=Pt(pr.from)||pr.from,b2=Pt(pr.to);if(b2)s+=path('M'+P(a2)+' L'+P(b2),null,'#1a1e26',1.1)+path('M'+P(a2)+' L'+P(b2),null,'#9aa4b3',0.45)+pulley(a2);break;
     case 'lever':var b3=Pt(pr.to);if(b3)s+=tubeS(pr.from,b3,3)+pulley(pr.from);break;
     case 'bar':var c=pr.atB&&o.bu?add(add(o.sh,mul(o.bu,pr.atB[0])),mul(o.bn,pr.atB[1])):Pt(pr.at);if(c){c=add(c,pr.off||[0,0]);s+=plateS(c,9);}break;
-    case 'db':(pr.at.split?pr.at.split(','):pr.at).forEach(function(k){var c2=Pt(k);if(c2)s+='<polygon points="'+[0,1,2,3,4,5].map(function(i){var an=Math.PI/3*i+Math.PI/6;return f(c2[0]+4.6*Math.cos(an))+','+f(c2[1]+4.6*Math.sin(an));}).join(' ')+'" fill="url(#dmPlate)" stroke="'+OUT+'" stroke-width=".5"/><circle cx="'+f(c2[0])+'" cy="'+f(c2[1])+'" r="1.4" fill="#b5bdc9" stroke="'+OUT+'" stroke-width=".35"/>';});break;
+    case 'db':(pr.at.split?pr.at.split(','):pr.at).forEach(function(k){var c2=Pt(k);if(c2)c2=add(c2,pr.off||[0,0]);if(c2)s+='<polygon points="'+[0,1,2,3,4,5].map(function(i){var an=Math.PI/3*i+Math.PI/6;return f(c2[0]+4.6*Math.cos(an))+','+f(c2[1]+4.6*Math.sin(an));}).join(' ')+'" fill="url(#dmPlate)" stroke="'+OUT+'" stroke-width=".5"/><circle cx="'+f(c2[0])+'" cy="'+f(c2[1])+'" r="1.4" fill="#b5bdc9" stroke="'+OUT+'" stroke-width=".35"/>';});break;
     case 'roller':var c3=Pt(pr.at);if(c3){c3=add(c3,pr.off||[0,0]);s+='<circle cx="'+f(c3[0])+'" cy="'+f(c3[1])+'" r="4" fill="url(#dmPad)" stroke="'+OUT+'" stroke-width=".45"/><circle cx="'+f(c3[0])+'" cy="'+f(c3[1])+'" r="1.1" fill="#c3cbd6" stroke="'+OUT+'" stroke-width=".3"/>';}break;
     case 'platform':var c4=Pt(pr.at);if(c4){var mid=add(c4,pr.off||[0,0]);s+=tubeS(pt(mid,16,pr.ang),pt(mid,16,pr.ang+180),4);}break;
     case 'sled':if(o.sh&&!o.front){var u2=nrm(sub(o.sh,o.hip)),n2=rotFront(u2),q0=add(add(o.hip,mul(u2,-2)),mul(n2,-8.4)),q1=add(add(o.sh,mul(u2,3)),mul(n2,-8.4));
@@ -623,7 +623,41 @@ var MU={
 'elevacao-frontal-halter':mm('frontDelt','sideDelt'),
 'remada-alta':mm('sideDelt traps','frontDelt biceps'),
 'crucifixo-inverso-halter':mm('rearDelt','upperBack'),
-'elev-lateral-maquina':mm('sideDelt','traps')
+'elev-lateral-maquina':mm('sideDelt','traps'),
+'rosca-concentrada':mm('biceps','forearm'),
+'rosca-inclinada-halter':mm('biceps','forearm'),
+'rosca-barra-w':mm('biceps','forearm'),
+'rosca-martelo-cabo':mm('biceps forearm',''),
+'rosca-scott-halter':mm('biceps','forearm'),
+'rosca-inversa':mm('forearm biceps',''),
+'supino-fechado':mm('triceps chest','frontDelt'),
+'triceps-testa-halter':mm('triceps',''),
+'triceps-barra-polia':mm('triceps',''),
+'triceps-coice':mm('triceps','rearDelt'),
+'triceps-frances-cabo':mm('triceps',''),
+'triceps-unilateral-cabo':mm('triceps',''),
+'flexao-diamante':mm('triceps chest','frontDelt abs'),
+'mergulho-assistido':mm('triceps chest','frontDelt'),
+'agachamento-frontal':mm('quads','glutes abs'),
+'agachamento-goblet':mm('quads glutes','abs adductors'),
+'agachamento-smith':mm('quads glutes','hamstrings'),
+'leg-press-horizontal':mm('quads glutes','hamstrings'),
+'passada':mm('quads glutes','hamstrings calves'),
+'afundo-reverso':mm('quads glutes','hamstrings'),
+'step-up-halter':mm('quads glutes','hamstrings calves'),
+'agachamento-sumo':mm('glutes quads adductors','hamstrings'),
+'agachamento-salto':mm('quads glutes','calves hamstrings'),
+'agachamento-parede':mm('quads','glutes'),
+'stiff-unilateral':mm('hamstrings glutes','lowerBack'),
+'flexao-nordica':mm('hamstrings','glutes calves'),
+'flexora-em-pe':mm('hamstrings','calves'),
+'ponte-gluteo-unilateral':mm('glutes','hamstrings'),
+'elevacao-pelvica-halter':mm('glutes','hamstrings quads'),
+'abducao-cabo':mm('abductors glutes',''),
+'coice-maquina':mm('glutes','hamstrings'),
+'quatro-apoios-gluteo':mm('glutes','hamstrings'),
+'panturrilha-leg-press':mm('calves',''),
+'panturrilha-unilateral':mm('calves','')
 };
 /* vistas: flip = de bruços/de frente para o chão; back = vista de costas */
 var VIEW={'crucifixo-inverso':{back:1},'barra-fixa':{back:1}};
@@ -739,7 +773,42 @@ var D={
 'elevacao-frontal-halter':{a:M(STAND,{arms:[{ua:-86,el:4}]}),b:M(STAND,{arms:[{ua:2,el:4}]}),props:[{t:'db',at:'hand,hand2',front:1}]},
 'remada-alta':{a:M(STAND,{arms:[{ua:-86,el:2,sc:1,fa:-84,free:1}]}),b:M(STAND,{arms:[{ua:16,el:2,sc:0.62,fa:-118,free:1}]}),props:[{t:'bar',at:'hand',front:1}]},
 'crucifixo-inverso-halter':{a:{fk:1,pin:{k:'ank',p:[84,GA]},torso:28,legs:[{th:-70,kn:24,an:-6}],arms:[{ua:-90,el:8,sc:1}]},b:{fk:1,pin:{k:'ank',p:[84,GA]},torso:28,legs:[{th:-70,kn:24,an:-6}],arms:[{ua:-90,el:8,sc:0.3,free:1}]},props:[{t:'db',at:'hand',front:1}]},
-'elev-lateral-maquina':{a:{front:1,sy:46,hy:80,arm:{ang:[12,40]},leg:{knee:[92,86]}},b:{front:1,sy:46,hy:80,arm:{ang:[84,110]},leg:{knee:[92,86]}},props:[{t:'pad',x:58,y:84,w:44,h:6}]}
+'elev-lateral-maquina':{a:{front:1,sy:46,hy:80,arm:{ang:[12,40]},leg:{knee:[92,86]}},b:{front:1,sy:46,hy:80,arm:{ang:[84,110]},leg:{knee:[92,86]}},props:[{t:'pad',x:58,y:84,w:44,h:6}]},
+/* ---- Lote 3: braços, pernas, glúteos e panturrilhas (novos) ---- */
+'rosca-concentrada':{a:M(SEAT,{torso:58,arms:[{ua:-88,el:6}]}),b:M(SEAT,{torso:58,arms:[{ua:-84,el:128}]}),props:[SEATP,{t:'db',at:'hand',front:1}]},
+'rosca-inclinada-halter':{a:{fk:1,hip:[92,84],torso:125,legs:[{to:[118,GA]}],arms:[{ua:-95,el:4}]},b:{fk:1,hip:[92,84],torso:125,legs:[{to:[118,GA]}],arms:[{ua:-92,el:130}]},props:[{t:'pad',x:80,y:90,w:24,h:6},{t:'back',from:[87,93],ang:125,len:46},{t:'db',at:'hand',front:1}]},
+'rosca-barra-w':{a:M(STAND,{arms:[{ua:-86,el:4}]}),b:M(STAND,{arms:[{ua:-78,el:140}]}),props:[{t:'bar',at:'hand',front:1}]},
+'rosca-martelo-cabo':{a:M(STAND,{arms:[{ua:-86,el:6}]}),b:M(STAND,{arms:[{ua:-78,el:132}]}),props:[{t:'cable',from:[128,108],to:'hand'},{t:'post',x:128,y1:70},{t:'handle',at:'hand',front:1}]},
+'rosca-scott-halter':{a:M(SEAT,{torso:82,arms:[{ua:-42,el:6}]}),b:M(SEAT,{torso:82,arms:[{ua:-42,el:118}]}),props:[SEATP,{t:'back',from:[70,57],ang:-42,len:26},{t:'db',at:'hand',front:1}]},
+'rosca-inversa':{a:M(STAND,{arms:[{ua:-86,el:4}]}),b:M(STAND,{arms:[{ua:-80,el:128}]}),props:[{t:'bar',at:'hand',front:1}]},
+'supino-fechado':{a:M(LIE,{arms:[{to:[71,64],j:'down',free:1}]}),b:M(LIE,{arms:[{to:[63,44.5],j:'down',free:1}]}),props:[LIEB,{t:'bar',at:'hand',front:1}]},
+'triceps-testa-halter':{a:M(LIE,{arms:[{ua:98,el:112}]}),b:M(LIE,{arms:[{ua:96,el:4}]}),props:[LIEB,{t:'db',at:'hand',front:1}]},
+'triceps-barra-polia':{a:M(STAND,{torso:84,legs:[{th:-86,kn:8}],arms:[{ua:-98,el:112}]}),b:M(STAND,{torso:84,legs:[{th:-86,kn:8}],arms:[{ua:-96,el:6}]}),props:[{t:'cable',from:[114,-10],to:'hand'},{t:'post',x:120},{t:'handle',at:'hand',front:1}]},
+'triceps-coice':{a:{fk:1,hip:[60,59],torso:6,legs:[{to:[78,GA]},{to:[36,85],an:55,far:1}],arms:[{ua:-174,el:96},{to:[96,85.6],far:1}]},b:{fk:1,hip:[60,59],torso:6,legs:[{to:[78,GA]},{to:[36,85],an:55,far:1}],arms:[{ua:-174,el:4},{to:[96,85.6],far:1}]},props:[{t:'bench',x1:24,x2:110,y:88},{t:'db',at:'hand',front:1}]},
+'triceps-frances-cabo':{a:{fk:1,pin:{k:'ank',p:[96,GA]},torso:66,legs:[{th:-74,kn:14},{to:[58,105],far:1}],arms:[{ua:104,el:132}]},b:{fk:1,pin:{k:'ank',p:[96,GA]},torso:66,legs:[{th:-74,kn:14},{to:[58,105],far:1}],arms:[{ua:98,el:6}]},props:[{t:'cable',from:[18,4],to:'hand'},{t:'post',x:12}]},
+'triceps-unilateral-cabo':{a:M(STAND,{torso:84,legs:[{th:-86,kn:8}],arms:[{ua:-98,el:115},{ua:-90,el:6,far:1}]}),b:M(STAND,{torso:84,legs:[{th:-86,kn:8}],arms:[{ua:-96,el:6},{ua:-90,el:6,far:1}]}),props:[{t:'cable',from:[114,-10],to:'hand'},{t:'post',x:120},{t:'handle',at:'hand',front:1}]},
+'flexao-diamante':{a:{fk:1,face:-1,floor:92,torso:168,contact:['hand','toe'],legs:[{th:-12,kn:0,an:0}],arms:[{ua:-84,el:0}]},b:{fk:1,face:-1,floor:92,torso:177,contact:['hand','toe'],legs:[{th:-3,kn:0,an:0}],arms:[{ua:-8,el:80}]},props:[]},
+'mergulho-assistido':{a:{fk:1,hip:[70,56],torso:90,legs:[{th:-90,kn:90,an:60}],arms:[{to:[74,59],j:'back'}]},b:{fk:1,hip:[70,70],torso:90,legs:[{th:-90,kn:90,an:60}],arms:[{to:[74,59],j:'back'}]},props:[{t:'pull',x1:62,x2:96,y:61},{t:'post',x:36,y1:-6},{t:'platform',at:'knee',ang:0,off:[-10,5]}]},
+'agachamento-frontal':{a:{fk:1,pin:{k:'ank',p:[84,GA]},torso:88,legs:[{th:-90,kn:0}],arms:[{toB:[-1,8],j:'down',free:1}]},b:{fk:1,pin:{k:'ank',p:[84,GA]},torso:62,legs:[{th:-10,kn:104,an:-22}],arms:[{toB:[-1,8],j:'down',free:1}]},props:[{t:'bar',atB:[-1,7],front:1}]},
+'agachamento-goblet':{a:{fk:1,pin:{k:'ank',p:[84,GA]},torso:88,legs:[{th:-90,kn:0}],arms:[{toB:[-9,8],j:'down',free:1}]},b:{fk:1,pin:{k:'ank',p:[84,GA]},torso:60,legs:[{th:-10,kn:104,an:-22}],arms:[{toB:[-9,8],j:'down',free:1}]},props:[{t:'db',at:'hand',front:1}]},
+'agachamento-smith':{a:{fk:1,pin:{k:'ank',p:[90,GA]},torso:88,legs:[{th:-86,kn:4}],arms:[{toB:[-1,-6],j:'down',free:1}]},b:{fk:1,pin:{k:'ank',p:[90,GA]},torso:60,legs:[{th:-6,kn:96,an:-14}],arms:[{toB:[-1,-6],j:'down',free:1}]},props:[{t:'post',x:70,y1:-14},{t:'post',x:58,y1:-14},{t:'bar',atB:[-1,-7]}]},
+'leg-press-horizontal':{a:{fk:1,hip:[62,84],torso:125,legs:[{to:[90,70]}],arms:[{to:[66,92],j:'down'}]},b:{fk:1,hip:[62,84],torso:125,legs:[{to:[110,72]}],arms:[{to:[66,92],j:'down'}]},props:[{t:'pad',x:48,y:90,w:26,h:6},{t:'back',from:[58,92],ang:125,len:44},{t:'platform',at:'ank',ang:90,off:[4,-3]},{t:'post',x:140,y1:30}]},
+'passada':{a:{fk:1,pin:{k:'ank',p:[100,GA]},torso:90,legs:[{th:-63,kn:0,an:-25},{to:[52,103.8],an:5,far:1}],arms:HANG},b:{fk:1,pin:{k:'ank',p:[100,GA]},torso:90,legs:[{th:-5,kn:85,an:-5},{to:[52,103.8],an:5,far:1}],arms:HANG},props:[{t:'db',at:'hand,hand2',front:1}]},
+'afundo-reverso':{a:{fk:1,pin:{k:'ank',p:[96,GA]},torso:90,legs:[{th:-90,kn:0},{to:[92,106.6],far:1}],arms:HANG},b:{fk:1,pin:{k:'ank',p:[96,GA]},torso:90,legs:[{th:-5,kn:85,an:-5},{to:[48,103.8],an:5,far:1}],arms:HANG},props:[{t:'db',at:'hand,hand2',front:1}]},
+'step-up-halter':{a:{fk:1,hip:[72,62],torso:88,legs:[{to:[100,81.4]},{to:[64,107],far:1}],arms:HANG},b:{fk:1,hip:[96,34],torso:90,legs:[{to:[100,81.4]},{to:[104,60],an:20,far:1}],arms:HANG},props:[{t:'box',x1:86,x2:122,y:84},{t:'db',at:'hand,hand2',front:1}]},
+'agachamento-sumo':{a:{fk:1,pin:{k:'ank',p:[84,GA]},torso:88,legs:[{th:-90,kn:0}],arms:[{ua:-90,el:0}]},b:{fk:1,pin:{k:'ank',p:[84,GA]},torso:72,legs:[{th:-16,kn:88,an:-14}],arms:[{ua:-90,el:0}]},props:[{t:'db',at:'hand',front:1}]},
+'agachamento-salto':{a:{fk:1,pin:{k:'ank',p:[84,GA]},torso:52,legs:[{th:-12,kn:98,an:-18}],arms:[{ua:-130,el:10}]},b:{fk:1,pin:{k:'ank',p:[84,94]},torso:88,legs:[{th:-90,kn:2,an:40}],arms:[{ua:110,el:10}]},props:[]},
+'agachamento-parede':{a:{fk:1,hip:[24,84.4],torso:90,legs:[{th:0,kn:90}],arms:[{toRel:['knee',[-3,-4]],j:'down'}]},b:{fk:1,hip:[24,84.4],torso:91,legs:[{th:0,kn:90}],arms:[{toRel:['knee',[-5,-4]],j:'down'}]},props:[{t:'wall',x:-26}]},
+'stiff-unilateral':{a:{fk:1,pin:{k:'ank',p:[80,GA]},torso:88,legs:[{th:-89,kn:4},{th:-96,kn:30,an:0,far:1}],arms:[{ua:-90,el:2}]},b:{fk:1,pin:{k:'ank',p:[80,GA]},torso:12,legs:[{th:-76,kn:12,an:-4},{th:-168,kn:4,an:30,far:1}],arms:[{ua:-90,el:2}]},props:[{t:'db',at:'hand',front:1}]},
+'flexao-nordica':{a:{fk:1,pin:{k:'knee',p:[74,108.4]},torso:90,legs:[{th:-90,kn:90,an:75}],arms:[{toB:[-8,7],j:'down',free:1}]},b:{fk:1,pin:{k:'knee',p:[74,108.4]},torso:52,legs:[{th:-128,kn:52,an:75}],arms:[{toB:[-8,7],j:'down',free:1}]},props:[{t:'mat',x1:20,x2:120},{t:'roller',at:'ank',off:[0,-4]}]},
+'flexora-em-pe':{a:{fk:1,pin:{k:'ank2',p:[80,GA]},torso:84,legs:[{th:-92,kn:4},{th:-90,kn:2,far:1}],arms:[{to:[100,40]}]},b:{fk:1,pin:{k:'ank2',p:[80,GA]},torso:84,legs:[{th:-86,kn:108},{th:-90,kn:2,far:1}],arms:[{to:[100,40]}]},props:[{t:'post',x:104,y1:20},{t:'pad',x:92,y:46,w:6,h:30},{t:'roller',at:'ank',off:[-3,0]}]},
+'ponte-gluteo-unilateral':{a:{fk:1,pin:{k:'sh',p:[46,105]},torso:180,legs:[{to:[98,GA]},{th:30,kn:0,an:10,far:1}],arms:[{ua:-6,el:0}]},b:{fk:1,pin:{k:'sh',p:[46,105]},torso:200,legs:[{to:[98,GA]},{th:12,kn:0,an:10,far:1}],arms:[{ua:-6,el:0}]},props:[{t:'mat',x1:20,x2:132}]},
+'elevacao-pelvica-halter':{a:{fk:1,pin:{k:'sh',p:[47,79]},torso:148,nod:-10,legs:[{to:[96,GA]}],arms:[{toRel:['hip',[0,-6]],j:'down'}]},b:{fk:1,pin:{k:'sh',p:[47,79]},torso:180,nod:-18,legs:[{to:[96,GA]}],arms:[{toRel:['hip',[0,-6]],j:'down'}]},props:[{t:'bench',x1:14,x2:54,y:84},{t:'db',at:'hip',off:[0,-8],front:1}]},
+'abducao-cabo':{a:{front:1,sy:26,hy:60,armR:{ang:[6,6]},armL:{to:[136,44],bend:-1},legR:{ang:3},legL:{ang:3}},b:{front:1,sy:26,hy:60,armR:{ang:[6,6]},armL:{to:[136,44],bend:-1},legR:{ang:32},legL:{ang:3}},props:[{t:'cable',from:[14,106],to:'ank'},{t:'post',x:14,y1:20}]},
+'coice-maquina':{a:{fk:1,pin:{k:'ank2',p:[76,GA]},torso:62,legs:[{th:-96,kn:46,an:20},{th:-88,kn:6,far:1}],arms:[{to:[112,46]}]},b:{fk:1,pin:{k:'ank2',p:[76,GA]},torso:62,legs:[{th:-150,kn:14,an:30},{th:-88,kn:6,far:1}],arms:[{to:[112,46]}]},props:[{t:'post',x:118,y1:24},{t:'pad',x:96,y:40,w:6,h:26},{t:'lever',from:[86,84],to:'ank'},{t:'roller',at:'ank',off:[-2,2]}]},
+'quatro-apoios-gluteo':{a:{fk:1,face:-1,floor:84,torso:178,contact:['hand','knee'],legs:[{th:-90,kn:90,an:60},{th:-90,kn:90,an:60,far:1}],arms:[{ua:-90,el:0}]},b:{fk:1,face:-1,floor:84,torso:178,contact:['hand','knee'],legs:[{th:14,kn:96,an:30},{th:-90,kn:90,an:60,far:1}],arms:[{ua:-90,el:0}]},props:[{t:'mat',x1:30,x2:130}]},
+'panturrilha-leg-press':{a:{fk:1,hip:[62,84],torso:125,legs:[{th:4,kn:4,an:-15}],arms:[{to:[66,92],j:'down'}]},b:{fk:1,hip:[62,84],torso:125,legs:[{th:4,kn:4,an:40}],arms:[{to:[66,92],j:'down'}]},props:[{t:'pad',x:48,y:90,w:26,h:6},{t:'back',from:[58,92],ang:125,len:44},{t:'platform',at:'toe',ang:96,off:[2,-5]},{t:'post',x:140,y1:30}]},
+'panturrilha-unilateral':{a:{fk:1,pin:{k:'toe',p:[96,102.6]},torso:90,legs:[{th:-90,kn:0,an:-18},{th:-84,kn:74,an:20,far:1}],arms:[{ua:-90,el:4},{to:[117,40],far:1}]},b:{fk:1,pin:{k:'toe',p:[96,102.6]},torso:90,legs:[{th:-90,kn:0,an:40},{th:-84,kn:74,an:20,far:1}],arms:[{ua:-90,el:4},{to:[117,38],far:1}]},props:[{t:'step',x1:91,x2:112,y:104},{t:'wall',x:118},{t:'db',at:'hand',front:1}]}
 };
 
 
