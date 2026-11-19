@@ -592,7 +592,7 @@ var S={
 'panturrilha-pe':['Apoie a ponta dos pés na plataforma, com os calcanhares para fora.','Posicione os ombros sob os apoios, joelhos estendidos.','Suba na ponta dos pés o máximo que conseguir.','Desça até sentir o alongamento da panturrilha.'],
 'panturrilha-pc':['Apoie a ponta dos pés num degrau e uma mão na parede.','Deixe os calcanhares descerem um pouco.','Suba na ponta dos pés.','Desça devagar. Para ficar mais difícil, faça com uma perna de cada vez.'],
 'panturrilha-sentado':['Sente com a ponta dos pés na plataforma e o apoio sobre os joelhos.','Destrave o aparelho.','Suba os calcanhares o máximo possível.','Desça até sentir o alongamento.'],
-'prancha':['Apoie os antebraços no chão, cotovelos abaixo dos ombros.','Estenda as pernas e fique na ponta dos pés.','Mantenha o corpo reto, com abdômen e glúteos contraídos.','Segure o tempo combinado respirando normalmente (anote os segundos em Reps).'],
+'prancha':['Apoie os antebraços no chão, cotovelos abaixo dos ombros.','Estenda as pernas e fique na ponta dos pés.','Mantenha o corpo reto, com abdômen e glúteos contraídos.','Segure o tempo combinado respirando normalmente (registre o tempo).'],
 'abdominal-cabo':['Ajoelhe de frente para a polia alta e segure a corda ao lado da cabeça.','Mantenha o quadril parado.','Enrole o tronco para baixo, levando os cotovelos em direção às coxas.','Volte devagar.'],
 'elevacao-pernas':['Deite de costas com as mãos ao lado do corpo.','Com as pernas estendidas, eleve-as até ficarem verticais.','Mantenha a lombar encostada no chão.','Desça devagar, sem encostar os pés no chão.'],
 'abdominal-maquina':['Sente com os pés presos e segure as pegadas.','Mantenha o quadril parado.','Enrole o tronco à frente contraindo o abdômen.','Volte devagar.'],
@@ -600,7 +600,7 @@ var S={
 'superman':['Deite de bruços com os braços estendidos à frente.','Contraia glúteos e lombar.','Tire braços, peito e pernas do chão ao mesmo tempo.','Segure um segundo no alto e desça devagar.'],
 'subida-banco':['Fique de frente para um banco ou degrau firme.','Apoie um pé inteiro sobre ele.','Suba empurrando com essa perna e leve o outro joelho para cima.','Desça controlando e alterne as pernas.'],
 'flexao-pike':['Comece na posição de flexão e leve o quadril para cima, formando um V invertido.','Mantenha as pernas o mais estendidas possível.','Dobre os cotovelos e desça a cabeça em direção ao chão, entre as mãos.','Empurre de volta.'],
-'escalador':['Comece na posição de flexão, braços estendidos.','Traga um joelho em direção ao peito.','Volte e troque a perna, num ritmo rápido.','Mantenha o quadril baixo e o abdômen firme (anote os segundos ou as repetições).'],
+'escalador':['Comece na posição de flexão, braços estendidos.','Traga um joelho em direção ao peito.','Volte e troque a perna, num ritmo rápido.','Mantenha o quadril baixo e o abdômen firme (registre o tempo).'],
 'polichinelo':['Em pé, com os pés juntos e os braços ao lado do corpo.','Salte abrindo as pernas e levando os braços acima da cabeça.','Salte de volta à posição inicial.','Mantenha um ritmo constante.']
 };
 
